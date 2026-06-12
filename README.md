@@ -55,12 +55,19 @@ git https://github.com/Thekidema/farmiplus.git
 
 ```
 
-### 2. Configurar la base de datos
+## 2 Estructura de ramas
 
-Crear la base de datos en MySQL:
+| Rama | Propósito |
+|------|-----------|
+| `main` | Versión estable y funcional del proyecto |
+| `feature/nombre-funcionalidad` | Desarrollo de nuevas funcionalidades |
 
-```sql
-CREATE DATABASE farmiplus;
+**Ejemplo de nombres de ramas:**
+```
+feature/gestion-inventario
+feature/modulo-ventas
+feature/reservas-cliente
+feature/autenticacion-roles
 ```
 
 ## Estado del proyecto
