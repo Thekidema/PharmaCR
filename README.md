@@ -22,10 +22,9 @@ Desarrollado en el marco del curso **SC-403 Desarrollo de Aplicaciones Web y Pat
 FarmiPlus es una aplicación web diseñada para centralizar y automatizar las operaciones de una cadena de farmacias. Permite gestionar el inventario de productos, registrar ventas, administrar reservas y controlar el acceso según el rol del usuario dentro del sistema.
 
 **Roles del sistema:**
-- **Administrador:** gestión completa de sucursales, usuarios, inventario y reportes.
-- **Farmacéutico:** atención de ventas, consulta de inventario y procesamiento de reservas.
-- **Cliente:** consulta de productos, realización y seguimiento de reservas.
-
+- **Administrador:** 
+- **Farmacéutico:** 
+- **Cliente:** 
 ---
 
 ## Tecnologías utilizadas
@@ -33,7 +32,7 @@ FarmiPlus es una aplicación web diseñada para centralizar y automatizar las op
 | Capa | Tecnología |
 |------|------------|
 | Backend | Java 17 + Spring Boot |
-| Frontend | Thymeleaf + Bootstrap 5 |
+| Frontend | Thymeleaf + Bootstrap  |
 | Persistencia | Hibernate / JPA |
 | Base de datos | MySQL |
 | Control de versiones | Git + GitHub |
@@ -63,79 +62,6 @@ Crear la base de datos en MySQL:
 ```sql
 CREATE DATABASE farmiplus;
 ```
-
-Editar el archivo `src/main/resources/application.properties` con las credenciales correspondientes:
-
-```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/farmiplus
-spring.datasource.username=<tu_usuario>
-spring.datasource.password=<tu_contraseña>
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
-```
-
-### 3. Compilar y ejecutar
-
-```bash
-mvn clean install
-mvn spring-boot:run
-```
-
-### 4. Acceder a la aplicación
-
-Abrir el navegador en:
-
-```
-http://localhost:8080
-```
-
----
-
-## Estructura de ramas
-
-| Rama | Propósito |
-|------|-----------|
-| `main` | Versión estable y funcional del proyecto |
-| `feature/nombre-funcionalidad` | Desarrollo de nuevas funcionalidades |
-
-**Ejemplo de nombres de ramas:**
-```
-feature/gestion-inventario
-feature/modulo-ventas
-feature/reservas-cliente
-feature/autenticacion-roles
-```
-
-> Ningún integrante debe hacer commits directamente sobre `main`. Los cambios se integran mediante pull requests revisados por al menos un compañero.
-
----
-
-## Convención de commits
-
-Los mensajes de commit deben estar escritos en español, ser descriptivos e indicar claramente qué se realizó.
-
-**Formato sugerido:**
-```
-[tipo]: descripción breve de lo realizado
-```
-
-**Tipos:**
-- `agrega` — para funcionalidades o archivos nuevos
-- `corrige` — para corrección de errores
-- `modifica` — para cambios sobre código existente
-- `elimina` — para eliminación de código o archivos
-- `refactoriza` — para mejoras de estructura sin cambio de comportamiento
-- `docs` — para cambios en documentación
-
-**Ejemplos:**
-```
-agrega: módulo de registro de ventas con validación de stock
-corrige: error en cálculo de total al aplicar descuentos
-modifica: diseño del formulario de reservas con Bootstrap
-docs: actualiza README con instrucciones de instalación
-```
-
----
 
 ## Estado del proyecto
 
