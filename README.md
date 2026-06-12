@@ -19,7 +19,7 @@ Desarrollado en el marco del curso **SC-403 Desarrollo de Aplicaciones Web y Pat
 
 ## Descripción
 
-FarmiPlus es una aplicación web diseñada para centralizar y automatizar las operaciones de una cadena de farmacias. Permite gestionar el inventario de productos, registrar ventas, administrar reservas y controlar el acceso según el rol del usuario dentro del sistema.
+PharmaControl CR es una aplicación web diseñada para centralizar y automatizar las operaciones de una cadena de farmacias. Permite gestionar el inventario de productos, registrar ventas, administrar reservas y controlar el acceso según el rol del usuario dentro del sistema.
 
 **Roles del sistema:**
 - **Administrador:** 
