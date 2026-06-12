@@ -49,31 +49,19 @@ PharmaCR es una aplicación web diseñada para centralizar y automatizar las ope
 - MySQL 8.0 o superior
 - Git
 
-### 1. Clonar el repositorio
+### Clonar el repositorio
 
 ```bash
 git clone https://github.com/Thekidema/PharmaCR.git
 ```
 
-### 2. Configurar la base de datos
+###  Configurar la base de datos
 
 Crear la base de datos en MySQL:
 
 ```sql
 CREATE DATABASE pharmacr;
 ```
-
-
-
-### 3. Acceder a la aplicación
-
-Abrir el navegador en:
-
-```
-http://localhost:8080
-```
-
----
 
 ## Estructura de ramas
 
