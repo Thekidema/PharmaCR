@@ -10,10 +10,10 @@ Desarrollado en el marco del curso **SC-403 Desarrollo de Aplicaciones Web y Pat
 
 | Nombre | Correo institucional | GitHub |
 |--------|----------------------|--------|
-|        |                      |        |
-|        |                      |        |
-|        |                      |        |
-|        |                      |        |
+| Rosales Navarro Jeferson José | jrosales80649@ufide.ac.cr |        |
+| Melissa Rodríguez Espinoza | mrodriguez00720@ufide.ac.cr |        |
+| Kimberly Bolaños Marín | kbolanos80322@ufide.ac.cr |        |
+| Emanuel Chaves Vindas | echaves40339@ufide.ac.cr |        |
 
 ---
 
@@ -51,9 +51,9 @@ FarmiPlus es una aplicación web diseñada para centralizar y automatizar las op
 
 ### 1. Clonar el repositorio
 
-```bash
-git clone https://github.com/<usuario>/<repositorio>.git
-cd <repositorio>
+```
+git https://github.com/Thekidema/farmiplus.git
+
 ```
 
 ### 2. Configurar la base de datos
