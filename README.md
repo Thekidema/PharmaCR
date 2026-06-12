@@ -1,4 +1,4 @@
-# FarmiPlus
+# PharmaControl CR
 
 Sistema web transaccional para la gestión de ventas, inventario y reservas de una cadena de farmacias con múltiples sucursales.
 
