@@ -63,24 +63,9 @@ Crear la base de datos en MySQL:
 CREATE DATABASE pharmacr;
 ```
 
-Editar el archivo `src/main/resources/application.properties` con las credenciales correspondientes:
 
-```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/pharmacr
-spring.datasource.username=<tu_usuario>
-spring.datasource.password=<tu_contraseña>
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
-```
 
-### 3. Compilar y ejecutar
-
-```bash
-mvn clean install
-mvn spring-boot:run
-```
-
-### 4. Acceder a la aplicación
+### 3. Acceder a la aplicación
 
 Abrir el navegador en:
 
@@ -103,19 +88,6 @@ feature/gestion-inventario
 feature/modulo-ventas
 feature/reservas-cliente
 feature/autenticacion-roles
-```
-
-> Ningún integrante debe hacer commits directamente sobre `main`. Los cambios se integran mediante pull requests revisados por al menos un compañero.
-
----
-
-## Convención de commits
-
-Los mensajes de commit deben estar escritos en español, ser descriptivos e indicar claramente qué se realizó.
-
-**Formato sugerido:**
-```
-[tipo]: descripción breve de lo realizado
 ```
 
 **Tipos:**
