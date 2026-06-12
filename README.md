@@ -12,7 +12,7 @@ Desarrollado en el marco del curso **SC-403 Desarrollo de Aplicaciones Web y Pat
 |--------|----------------------|--------|
 | Rosales Navarro Jeferson José | jrosales80649@ufide.ac.cr |        |
 | Melissa Rodríguez Espinoza | mrodriguez00720@ufide.ac.cr |        |
-| Kimberly Bolaños Marín | kbolanos80322@ufide.ac.cr |        |
+| Kimberly Bolaños Marín | kbolanos80322@ufide.ac.cr |     @kmarin08   |
 | Emanuel Chaves Vindas | echaves40339@ufide.ac.cr | @Thekidema |
 
 ---
