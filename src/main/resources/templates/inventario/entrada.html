@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{general/fragmentos :: head}"></head>
+    <body>
+        <header th:replace="~{general/fragmentos :: header}"></header>
+        <section th:replace="~{general/fragmentos :: mostrarToast}"></section>
+
+        <section class="py-4">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-8 offset-md-2">
+
+                        <h2><i class="fas fa-plus"></i> [[#{inventario.entrada.titulo}]]</h2>
+
+                        <form th:action="@{/inventario/entrada/agregar}" th:object="${entrada}" method="post" class="mt-3">
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">[[#{proveedor.nombreComercial}]] *</label>
+                                    <select class="form-select" th:field="*{proveedor.idProveedor}" required>
+                                        <option value="">-- Seleccione --</option>
+                                        <option th:each="p : ${proveedores}"
+                                                th:value="${p.idProveedor}"
+                                                th:text="${p.nombreComercial}"></option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">[[#{medicamento.nombre}]] *</label>
+                                    <select class="form-select" th:field="*{medicamento.idMedicamento}" required>
+                                        <option value="">-- Seleccione --</option>
+                                        <option th:each="m : ${medicamentos}"
+                                                th:value="${m.idMedicamento}"
+                                                th:text="${m.codigo + ' — ' + m.nombre}"></option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">[[#{inventario.lote}]] *</label>
+                                    <input type="text" class="form-control" th:field="*{lote}"
+                                           placeholder="Ej: LOTE-2026-010" maxlength="50" required/>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">[[#{inventario.fechaVencimiento}]] *</label>
+                                    <input type="date" class="form-control" th:field="*{fechaVencimiento}" required/>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">[[#{inventario.cantidad}]] *</label>
+                                    <input type="number" class="form-control" th:field="*{cantidad}"
+                                           placeholder="Ej: 50" min="1" required/>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">[[#{inventario.registradoPor}]] *</label>
+                                    <select class="form-select" th:field="*{usuario.idUsuario}" required>
+                                        <option value="">-- Seleccione --</option>
+                                        <option th:each="u : ${usuarios}"
+                                                th:value="${u.idUsuario}"
+                                                th:text="${u.username}"></option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">[[#{inventario.observaciones}]]</label>
+                                <input type="text" class="form-control" th:field="*{observaciones}"
+                                       placeholder="Ej: Pedido mensual" maxlength="300"/>
+                            </div>
+
+                            <div class="mt-4">
+                                <button type="submit" class="btn btn-primary me-2">
+                                    <i class="fas fa-save"></i> [[#{accion.agregar}]]
+                                </button>
+                                <a th:href="@{/inventario/entradas}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left"></i> [[#{accion.cancelar}]]
+                                </a>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer th:replace="~{general/fragmentos :: footer}"></footer>
+    </body>
+</html>
