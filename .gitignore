@@ -1,0 +1,16 @@
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.log
+.idea/
+*.iml
+*.ipr
+*.iws
+.settings/
+.classpath
+.project
+.nbproject/
+nb-configuration.xml
+.DS_Store
