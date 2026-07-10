@@ -1,0 +1,77 @@
+````````````````````````````````````````<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{general/fragmentos :: head}"></head>
+    <body>
+        <header th:replace="~{general/fragmentos :: header}"></header>
+        <section th:replace="~{general/fragmentos :: mostrarToast}"></section>
+
+        <section class="py-4">
+            <div class="container">
+                <div class="row mb-4">
+                    <div class="col-md-12 text-center">
+                        <h2><i class="fas fa-house-medical"></i> [[#{index.bienvenida}]]</h2>
+                        <p class="lead">[[#{aplicacion.descripcion}]]</p>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-center border-primary h-100">
+                            <div class="card-body">
+                                <i class="fas fa-pills fa-2x text-primary mb-2"></i>
+                                <h5 class="card-title">[[#{index.medicamentosActivos}]]</h5>
+                                <p class="card-text display-6">[[${totalMedicamentos}]]</p>
+                                <a th:href="@{/medicamento/listado}" class="btn btn-primary btn-sm">[[#{accion.ver}]]</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-center border-success h-100">
+                            <div class="card-body">
+                                <i class="fas fa-cash-register fa-2x text-success mb-2"></i>
+                                <h5 class="card-title">[[#{index.ventasDelDia}]]</h5>
+                                <p class="card-text display-6">[[${totalVentasDelDia}]]</p>
+                                <p class="text-muted">₡ [[${montoVentasDelDia}]]</p>
+                                <a th:href="@{/venta/listado}" class="btn btn-success btn-sm">[[#{accion.ver}]]</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-center border-warning h-100">
+                            <div class="card-body">
+                                <i class="fas fa-bell fa-2x text-warning mb-2"></i>
+                                <h5 class="card-title">[[#{index.alertasActivas}]]</h5>
+                                <p class="card-text display-6">[[${totalAlertas}]]</p>
+                                <a th:href="@{/alerta/listado}" class="btn btn-warning btn-sm">[[#{accion.ver}]]</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-center border-info h-100">
+                            <div class="card-body">
+                                <i class="fas fa-chart-column fa-2x text-info mb-2"></i>
+                                <h5 class="card-title">[[#{plantilla.reportes}]]</h5>
+                                <p class="card-text"><br/></p>
+                                <a th:href="@{/reportes/inventario}" class="btn btn-info btn-sm">[[#{reporte.inventario.titulo}]]</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4" th:if="${!alertas.isEmpty()}">
+                    <div class="col-md-12">
+                        <div class="alert alert-warning">
+                            <h5><i class="fas fa-triangle-exclamation"></i> [[#{index.alertasActivas}]]</h5>
+                            <ul class="mb-0">
+                                <li th:each="a : ${alertas}">[[${a.mensaje}]]</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer th:replace="~{general/fragmentos :: footer}"></footer>
+    </body>
+</html>
