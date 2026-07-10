@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{general/fragmentos :: head}"></head>
+    <body>
+        <header th:replace="~{general/fragmentos :: header}"></header>
+        <section th:replace="~{general/fragmentos :: mostrarToast}"></section>
+
+        <section class="py-4">
+            <div class="container">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <h2><i class="fas fa-right-from-bracket"></i> [[#{inventario.salidas.titulo}]]</h2>
+                        <p class="text-muted">Total: [[${totalSalidas}]]</p>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <a th:href="@{/inventario/salida/agregar}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> [[#{inventario.salida.titulo}]]
+                        </a>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <table class="table table-striped table-hover table-bordered">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th>[[#{medicamento.nombre}]]</th>
+                                    <th>[[#{inventario.tipo}]]</th>
+                                    <th>[[#{inventario.cantidad}]]</th>
+                                    <th>[[#{inventario.motivo}]]</th>
+                                    <th>[[#{inventario.registradoPor}]]</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="s : ${salidas}">
+                                    <td>[[${s.medicamento.nombre}]]</td>
+                                    <td><span class="badge bg-secondary">[[${s.tipo}]]</span></td>
+                                    <td>[[${s.cantidad}]]</td>
+                                    <td>[[${s.motivo}]]</td>
+                                    <td>[[${s.usuario.username}]]</td>
+                                </tr>
+                                <tr th:if="${salidas.isEmpty()}">
+                                    <td colspan="5" class="text-center text-muted">[[#{inventario.salidas.vacio}]]</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer th:replace="~{general/fragmentos :: footer}"></footer>
+    </body>
+</html>

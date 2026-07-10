@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{general/fragmentos :: head}"></head>
+    <body>
+        <header th:replace="~{general/fragmentos :: header}"></header>
+        <section th:replace="~{general/fragmentos :: mostrarToast}"></section>
+
+        <section class="py-4">
+            <div class="container">
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <h2><i class="fas fa-chart-column"></i> [[#{reporte.inventario.titulo}]]</h2>
+                    </div>
+                </div>
+
+                <!-- Medicamentos bajo el stock mínimo HU-14 -->
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <h4><i class="fas fa-arrow-trend-down text-danger"></i> [[#{reporte.bajoMinimo.titulo}]]</h4>
+                        <table class="table table-striped table-bordered">
+                            <thead class="table-danger">
+                                <tr>
+                                    <th>[[#{medicamento.codigo}]]</th>
+                                    <th>[[#{medicamento.nombre}]]</th>
+                                    <th>[[#{medicamento.stockActual}]]</th>
+                                    <th>[[#{medicamento.stockMinimo}]]</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="m : ${bajoMinimo}">
+                                    <td>[[${m.codigo}]]</td>
+                                    <td>[[${m.nombre}]]</td>
+                                    <td><span class="badge bg-danger">[[${m.stockActual}]]</span></td>
+                                    <td>[[${m.stockMinimo}]]</td>
+                                </tr>
+                                <tr th:if="${bajoMinimo.isEmpty()}">
+                                    <td colspan="4" class="text-center text-muted">[[#{reporte.bajoMinimo.vacio}]]</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Medicamentos próximos a vencer HU-15 -->
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h4><i class="fas fa-calendar-xmark text-warning"></i> [[#{reporte.porVencer.titulo}]]</h4>
+                            <form th:action="@{/reportes/inventario}" method="get" class="d-flex">
+                                <select name="dias" class="form-select me-2">
+                                    <option value="30" th:selected="${dias == 30}">30 [[#{reporte.dias}]]</option>
+                                    <option value="60" th:selected="${dias == 60}">60 [[#{reporte.dias}]]</option>
+                                    <option value="90" th:selected="${dias == 90}">90 [[#{reporte.dias}]]</option>
+                                </select>
+                                <button type="submit" class="btn btn-outline-primary">[[#{accion.buscar}]]</button>
+                            </form>
+                        </div>
+                        <table class="table table-striped table-bordered">
+                            <thead class="table-warning">
+                                <tr>
+                                    <th>[[#{medicamento.nombre}]]</th>
+                                    <th>[[#{inventario.lote}]]</th>
+                                    <th>[[#{inventario.cantidad}]]</th>
+                                    <th>[[#{inventario.fechaVencimiento}]]</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="e : ${porVencer}">
+                                    <td>[[${e.medicamento.nombre}]]</td>
+                                    <td>[[${e.lote}]]</td>
+                                    <td>[[${e.cantidad}]]</td>
+                                    <td>[[${e.fechaVencimiento}]]</td>
+                                </tr>
+                                <tr th:if="${porVencer.isEmpty()}">
+                                    <td colspan="4" class="text-center text-muted">[[#{reporte.porVencer.vacio}]]</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Existencias generales -->
+                <div class="row">
+                    <div class="col-md-12">
+                        <h4><i class="fas fa-boxes-stacked text-primary"></i> [[#{reporte.existencias.titulo}]]</h4>
+                        <table class="table table-striped table-bordered">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th>[[#{medicamento.codigo}]]</th>
+                                    <th>[[#{medicamento.nombre}]]</th>
+                                    <th>[[#{medicamento.categoria}]]</th>
+                                    <th>[[#{medicamento.stockActual}]]</th>
+                                    <th>[[#{medicamento.stockMinimo}]]</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="m : ${medicamentos}">
+                                    <td>[[${m.codigo}]]</td>
+                                    <td>[[${m.nombre}]]</td>
+                                    <td>[[${m.categoria.nombre}]]</td>
+                                    <td>
+                                        <span th:class="${m.stockActual < m.stockMinimo} ? 'badge bg-danger' : 'badge bg-success'">
+                                            [[${m.stockActual}]]
+                                        </span>
+                                    </td>
+                                    <td>[[${m.stockMinimo}]]</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer th:replace="~{general/fragmentos :: footer}"></footer>
+    </body>
+</html>
