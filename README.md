@@ -132,7 +132,7 @@ La aplicación queda en `http://localhost:8080`.
 | Avance 1 | Entregado |
 | Avance 2 | Entregado |
 | Avance 3 | Módulo de seguridad, cierre de historias y base de datos en la nube |
-| Entrega final | Pendiente |
+| Entrega final | Entregado |
 
 ---
 
