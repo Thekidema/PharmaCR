@@ -14,11 +14,12 @@
                     </div>
                 </div>
 
-                <!-- Medicamentos bajo el stock mínimo HU-14 -->
+                <!-- Medicamentos bajo el stock minimo HU-14 -->
                 <div class="row mb-4">
                     <div class="col-md-12">
                         <h4><i class="fas fa-arrow-trend-down text-danger"></i> [[#{reporte.bajoMinimo.titulo}]]</h4>
-                        <table class="table table-striped table-bordered">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-bordered">
                             <thead class="table-danger">
                                 <tr>
                                     <th>[[#{medicamento.codigo}]]</th>
@@ -39,10 +40,11 @@
                                 </tr>
                             </tbody>
                         </table>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Medicamentos próximos a vencer HU-15 -->
+                <!-- Medicamentos proximos a vencer HU-15 -->
                 <div class="row mb-4">
                     <div class="col-md-12">
                         <div class="d-flex justify-content-between align-items-center">
@@ -56,7 +58,8 @@
                                 <button type="submit" class="btn btn-outline-primary">[[#{accion.buscar}]]</button>
                             </form>
                         </div>
-                        <table class="table table-striped table-bordered">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-bordered">
                             <thead class="table-warning">
                                 <tr>
                                     <th>[[#{medicamento.nombre}]]</th>
@@ -77,6 +80,7 @@
                                 </tr>
                             </tbody>
                         </table>
+                        </div>
                     </div>
                 </div>
 
@@ -84,7 +88,8 @@
                 <div class="row">
                     <div class="col-md-12">
                         <h4><i class="fas fa-boxes-stacked text-primary"></i> [[#{reporte.existencias.titulo}]]</h4>
-                        <table class="table table-striped table-bordered">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-bordered">
                             <thead class="table-primary">
                                 <tr>
                                     <th>[[#{medicamento.codigo}]]</th>
@@ -108,6 +113,7 @@
                                 </tr>
                             </tbody>
                         </table>
+                        </div>
                     </div>
                 </div>
             </div>
