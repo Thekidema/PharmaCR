@@ -10,6 +10,11 @@ import com.pharmacr.service.MedicamentoService;
 import com.pharmacr.service.ProveedorService;
 import com.pharmacr.service.SalidaInventarioService;
 import com.pharmacr.service.UsuarioService;
+import java.security.Principal;
+import java.util.Locale;
+import java.util.Optional;
+import org.springframework.context.MessageSource;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +25,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/inventario")
+@PreAuthorize("hasRole('ENCARGADO_INVENTARIO')")
 public class InventarioController {
 
     private final EntradaInventarioService entradaInventarioService;
@@ -27,28 +33,30 @@ public class InventarioController {
     private final MedicamentoService medicamentoService;
     private final ProveedorService proveedorService;
     private final UsuarioService usuarioService;
+    private final MessageSource messageSource;
 
     public InventarioController(EntradaInventarioService entradaInventarioService,
             SalidaInventarioService salidaInventarioService, MedicamentoService medicamentoService,
-            ProveedorService proveedorService, UsuarioService usuarioService) {
+            ProveedorService proveedorService, UsuarioService usuarioService, MessageSource messageSource) {
         this.entradaInventarioService = entradaInventarioService;
         this.salidaInventarioService = salidaInventarioService;
         this.medicamentoService = medicamentoService;
         this.proveedorService = proveedorService;
         this.usuarioService = usuarioService;
+        this.messageSource = messageSource;
     }
 
-    @GetMapping("/entradas")
-    public String entradas(Model model) {
+    @GetMapping("/entrada/listado")
+    public String entradaListado(Model model) {
         var entradas = entradaInventarioService.getEntradas();
         model.addAttribute("entradas", entradas);
         model.addAttribute("totalEntradas", entradas.size());
-        return "inventario/entradas";
+        return "/inventario/entrada/listado";
     }
 
-    // Registro de entrada: aumenta stock automáticamente HU-11
-    @GetMapping("/entrada/agregar")
-    public String agregarEntrada(Model model) {
+    // Registro de entrada: aumenta stock automaticamente HU-11
+    @GetMapping("/entrada/nueva")
+    public String entradaNueva(Model model) {
         var entrada = new EntradaInventario();
         entrada.setProveedor(new Proveedor());
         entrada.setMedicamento(new Medicamento());
@@ -56,51 +64,66 @@ public class InventarioController {
         model.addAttribute("entrada", entrada);
         model.addAttribute("proveedores", proveedorService.getProveedores(true));
         model.addAttribute("medicamentos", medicamentoService.getMedicamentos(true));
-        model.addAttribute("usuarios", usuarioService.getUsuarios(true));
-        return "inventario/entrada";
+        return "/inventario/entrada/nueva";
     }
 
-    @PostMapping("/entrada/agregar")
-    public String agregarEntrada(@ModelAttribute EntradaInventario entrada,
-            RedirectAttributes redirectAttributes) {
-        try {
-            entradaInventarioService.save(entrada);
-            redirectAttributes.addFlashAttribute("todoOk", "Entrada registrada y stock actualizado.");
-        } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
+    @PostMapping("/entrada/guardar")
+    public String entradaGuardar(@ModelAttribute EntradaInventario entrada,
+            Principal principal, Locale locale, RedirectAttributes redirectAttributes) {
+        var usuario = usuarioActual(principal, locale, redirectAttributes);
+        if (usuario.isPresent()) {
+            try {
+                entradaInventarioService.save(entrada, usuario.get());
+                redirectAttributes.addFlashAttribute("todoOk",
+                        messageSource.getMessage("inventario.entrada.registrada", null, locale));
+            } catch (IllegalArgumentException e) {
+                redirectAttributes.addFlashAttribute("error", e.getMessage());
+            }
         }
-        return "redirect:/inventario/entradas";
+        return "redirect:/inventario/entrada/listado";
     }
 
-    @GetMapping("/salidas")
-    public String salidas(Model model) {
+    @GetMapping("/salida/listado")
+    public String salidaListado(Model model) {
         var salidas = salidaInventarioService.getSalidas();
         model.addAttribute("salidas", salidas);
         model.addAttribute("totalSalidas", salidas.size());
-        return "inventario/salidas";
+        return "/inventario/salida/listado";
     }
 
     // Registro de salida: descuenta stock con validacion HU-12
-    @GetMapping("/salida/agregar")
-    public String agregarSalida(Model model) {
+    @GetMapping("/salida/nueva")
+    public String salidaNueva(Model model) {
         var salida = new SalidaInventario();
         salida.setMedicamento(new Medicamento());
         salida.setUsuario(new Usuario());
         model.addAttribute("salida", salida);
         model.addAttribute("medicamentos", medicamentoService.getMedicamentos(true));
-        model.addAttribute("usuarios", usuarioService.getUsuarios(true));
-        return "inventario/salida";
+        return "/inventario/salida/nueva";
     }
 
-    @PostMapping("/salida/agregar")
-    public String agregarSalida(@ModelAttribute SalidaInventario salida,
-            RedirectAttributes redirectAttributes) {
-        try {
-            salidaInventarioService.save(salida);
-            redirectAttributes.addFlashAttribute("todoOk", "Salida registrada y stock actualizado.");
-        } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
+    @PostMapping("/salida/guardar")
+    public String salidaGuardar(@ModelAttribute SalidaInventario salida,
+            Principal principal, Locale locale, RedirectAttributes redirectAttributes) {
+        var usuario = usuarioActual(principal, locale, redirectAttributes);
+        if (usuario.isPresent()) {
+            try {
+                salidaInventarioService.save(salida, usuario.get());
+                redirectAttributes.addFlashAttribute("todoOk",
+                        messageSource.getMessage("inventario.salida.registrada", null, locale));
+            } catch (IllegalArgumentException e) {
+                redirectAttributes.addFlashAttribute("error", e.getMessage());
+            }
         }
-        return "redirect:/inventario/salidas";
+        return "redirect:/inventario/salida/listado";
+    }
+
+    //Resuelve el usuario autenticado; si no se puede identificar, flashea el
+    private Optional<Usuario> usuarioActual(Principal principal, Locale locale, RedirectAttributes redirectAttributes) {
+        var usuario = usuarioService.getUsuario(principal.getName());
+        if (usuario.isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", messageSource.getMessage("sesion.error01", null, locale));
+        }
+        return usuario;
     }
 }

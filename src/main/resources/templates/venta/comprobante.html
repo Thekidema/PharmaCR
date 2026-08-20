@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{general/fragmentos :: head}"></head>
+    <body>
+        <header th:replace="~{general/fragmentos :: header}"></header>
+        <section th:replace="~{general/fragmentos :: mostrarToast}"></section>
+
+        <section class="py-4">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+
+                        <!-- Los botones llevan la clase no-imprimir: estilos.css los oculta
+                             en el @media print para que solo salga el comprobante -->
+                        <div class="row mb-3 no-imprimir">
+                            <div class="col-md-6 d-grid">
+                                <a th:href="@{/venta/listado}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left"></i> [[#{accion.regresar}]]</a>
+                            </div>
+                            <div class="col-md-6 d-grid">
+                                <button type="button" class="btn btn-primary" onclick="window.print()">
+                                    <i class="fas fa-print"></i> [[#{venta.imprimir}]]</button>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header text-center">
+                                <h3><i class="fas fa-prescription-bottle-medical"></i> [[#{aplicacion.titulo}]]</h3>
+                                <p class="mb-0">[[#{venta.comprobante.titulo}]] N.º [[${venta.idVenta}]]</p>
+                            </div>
+                            <div class="card-body">
+
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <strong>[[#{venta.fecha}]]:</strong>
+                                        <span th:text="${#temporals.format(venta.fecha, 'dd/MM/yyyy HH:mm')}"></span>
+                                    </div>
+                                    <div class="col-md-6 text-md-end">
+                                        <strong>[[#{venta.usuario}]]:</strong> [[${venta.usuario.username}]]
+                                    </div>
+                                </div>
+
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>[[#{medicamento.codigo}]]</th>
+                                            <th>[[#{medicamento.nombre}]]</th>
+                                            <th class="text-center">[[#{inventario.cantidad}]]</th>
+                                            <th class="text-end">[[#{medicamento.precio}]]</th>
+                                            <th class="text-end">[[#{venta.subtotal}]]</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="d : ${detalles}">
+                                            <td>[[${d.medicamento.codigo}]]</td>
+                                            <td>[[${d.medicamento.nombre}]]</td>
+                                            <td class="text-center">[[${d.cantidad}]]</td>
+                                            <td class="text-end">₡[[${d.precioUnitario}]]</td>
+                                            <td class="text-end">₡[[${d.subtotal}]]</td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <th colspan="4" class="text-end">[[#{venta.total}]]</th>
+                                            <th class="text-end">₡[[${venta.total}]]</th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                                </div>
+
+                                <p class="text-center text-muted mt-4 mb-0">
+                                    <small>[[#{venta.comprobante.gracias}]]</small></p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer th:replace="~{general/fragmentos :: footer}"></footer>
+    </body>
+</html>

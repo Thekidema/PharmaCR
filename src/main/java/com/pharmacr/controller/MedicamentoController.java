@@ -8,8 +8,11 @@ import jakarta.validation.Valid;
 import java.util.Locale;
 import java.util.Optional;
 import org.springframework.context.MessageSource;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +22,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/medicamento")
+@PreAuthorize("hasAnyRole('ENCARGADO_INVENTARIO','FARMACEUTICO')")
 public class MedicamentoController {
 
     private final MedicamentoService medicamentoService;
@@ -42,11 +46,13 @@ public class MedicamentoController {
         model.addAttribute("totalMedicamentos", medicamentos.size());
         var categorias = categoriaMedicamentoService.getCategorias(true);
         model.addAttribute("categorias", categorias);
-        model.addAttribute("medicamento", new Medicamento());
+        if (!model.containsAttribute("medicamento")) {
+            model.addAttribute("medicamento", new Medicamento());
+        }
         return "/medicamento/listado";
     }
 
-    //Búsqueda por nombre o código, solo activos (HU-09)
+    //Busqueda por nombre o codigo, solo activos (HU-09)
     @GetMapping("/buscar")
     public String buscar(@RequestParam String termino, Model model) {
         var medicamentos = medicamentoService.buscar(termino);
@@ -63,61 +69,77 @@ public class MedicamentoController {
     @GetMapping("/disponibilidad")
     public String disponibilidad(Model model) {
         model.addAttribute("medicamentos", medicamentoService.getMedicamentos(true));
-        model.addAttribute("entradas", entradaInventarioService.getEntradas());
+        //Los lotes vienen agrupados por medicamento y ordenados por vencimiento:
+        //el primero de cada lista es el que vence mas pronto
+        model.addAttribute("lotes", medicamentoService.getLotesAgrupados());
         return "/medicamento/disponibilidad";
     }
 
+    @PreAuthorize("hasRole('ENCARGADO_INVENTARIO')")
     @PostMapping("/guardar")
-    public String guardar(@Valid Medicamento medicamento, RedirectAttributes redirectAttributes) {
+    public String guardar(@Valid Medicamento medicamento, BindingResult bindingResult,
+            RedirectAttributes redirectAttributes, Locale locale) {
 
-        medicamentoService.save(medicamento);
-        redirectAttributes.addFlashAttribute("todoOk", messageSource.getMessage("mensaje.actualizado", null, Locale.getDefault()));
+        if (bindingResult.hasErrors()) {
+            //Se conservan el objeto y los errores a traves del redirect (patron
+            //POST-Redirect-GET) para que el usuario no pierda lo que ya tecleo
+            redirectAttributes.addFlashAttribute(
+                    BindingResult.MODEL_KEY_PREFIX + "medicamento", bindingResult);
+            redirectAttributes.addFlashAttribute("medicamento", medicamento);
+            redirectAttributes.addFlashAttribute("error",
+                    messageSource.getMessage("medicamento.error04", null, locale));
+            if (medicamento.getIdMedicamento() == null) {
+                redirectAttributes.addFlashAttribute("reabrirModal", "agregarMedicamentoModal");
+                return "redirect:/medicamento/listado";
+            }
+            return "redirect:/medicamento/modificar/" + medicamento.getIdMedicamento();
+        }
+
+        String titulo = "todoOk";
+        String detalle = "mensaje.actualizado";
+        try {
+            medicamentoService.save(medicamento);
+        } catch (DataIntegrityViolationException e) {
+            titulo = "error";
+            detalle = "medicamento.error05";
+        }
+        redirectAttributes.addFlashAttribute(titulo, messageSource.getMessage(detalle, null, locale));
 
         return "redirect:/medicamento/listado";
     }
 
+    @PreAuthorize("hasRole('ENCARGADO_INVENTARIO')")
     @PostMapping("/eliminar")
-    public String eliminar(@RequestParam Integer idMedicamento, RedirectAttributes redirectAttributes) {
+    public String eliminar(@RequestParam Integer idMedicamento, RedirectAttributes redirectAttributes, Locale locale) {
         String titulo = "todoOk";
         String detalle = "mensaje.eliminado";
         try {
-            medicamentoService.delete(idMedicamento);
+            medicamentoService.desactivar(idMedicamento);
         } catch (IllegalArgumentException e) {
-            titulo = "error"; // Captura la excepción de argumento inválido para el mensaje de "no existe"
+            titulo = "error";                   // Captura la excepcion de argumento invalido para el mensaje de "no existe"
             detalle = "medicamento.error01";
-        } catch (IllegalStateException e) {
-            titulo = "error"; // Captura la excepción de estado ilegal para el mensaje de "datos asociados"
-            detalle = "medicamento.error02";
         } catch (Exception e) {
-            titulo = "error";  // Captura cualquier otra excepción inesperada
+            titulo = "error";                   // Captura cualquier otra excepcion inesperada
             detalle = "medicamento.error03";
         }
-        redirectAttributes.addFlashAttribute(titulo, messageSource.getMessage(detalle, null, Locale.getDefault()));
+        redirectAttributes.addFlashAttribute(titulo, messageSource.getMessage(detalle, null, locale));
         return "redirect:/medicamento/listado";
     }
 
+    @PreAuthorize("hasRole('ENCARGADO_INVENTARIO')")
     @GetMapping("/modificar/{idMedicamento}")
-    public String modificar(@PathVariable("idMedicamento") Integer idMedicamento, Model model, RedirectAttributes redirectAttributes) {
-        Optional<Medicamento> medicamentoOpt = medicamentoService.getMedicamento(idMedicamento);
-        if (medicamentoOpt.isEmpty()) {
-            redirectAttributes.addFlashAttribute("error", messageSource.getMessage("medicamento.error01", null, Locale.getDefault()));
-            return "redirect:/medicamento/listado";
+    public String modificar(@PathVariable("idMedicamento") Integer idMedicamento, Model model, RedirectAttributes redirectAttributes, Locale locale) {
+                                                  //Si guardar() ya flasheo el medicamento con errores de validacion se
+        if (!model.containsAttribute("medicamento")) {
+            Optional<Medicamento> medicamentoOpt = medicamentoService.getMedicamento(idMedicamento);
+            if (medicamentoOpt.isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", messageSource.getMessage("medicamento.error01", null, locale));
+                return "redirect:/medicamento/listado";
+            }
+            model.addAttribute("medicamento", medicamentoOpt.get());
         }
-        model.addAttribute("medicamento", medicamentoOpt.get());
         var categorias = categoriaMedicamentoService.getCategorias(true);
         model.addAttribute("categorias", categorias);
         return "/medicamento/modifica";
-    }
-
-    //Desactivación (soft-delete) de medicamentos descontinuados (HU-06)
-    @GetMapping("/desactivar/{idMedicamento}")
-    public String desactivar(@PathVariable("idMedicamento") Integer idMedicamento, RedirectAttributes redirectAttributes) {
-        try {
-            medicamentoService.desactivar(idMedicamento);
-            redirectAttributes.addFlashAttribute("todoOk", messageSource.getMessage("medicamento.desactivado", null, Locale.getDefault()));
-        } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("error", messageSource.getMessage("medicamento.error01", null, Locale.getDefault()));
-        }
-        return "redirect:/medicamento/listado";
     }
 }

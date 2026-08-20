@@ -1,4 +1,4 @@
-//Para insertar información en el modal según el registro...
+//Para insertar información en el modal según el registro
 document.addEventListener('DOMContentLoaded', function () {
     const confirmModal = document.getElementById('confirmModal');
     if (confirmModal) {
@@ -10,7 +10,16 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
-//Para quitar toast
 setTimeout(() => {
     document.querySelectorAll('.toast').forEach(t => t.classList.remove('show'));
 }, 4000);
+
+document.addEventListener('DOMContentLoaded', function () {
+    const idModal = document.body.getAttribute('data-reabrir-modal');
+    if (idModal) {
+        const modalEl = document.getElementById(idModal);
+        if (modalEl) {
+            new bootstrap.Modal(modalEl).show();
+        }
+    }
+});

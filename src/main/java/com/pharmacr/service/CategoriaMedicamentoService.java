@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class CategoriaMedicamentoService {
 
-    // Solo se enlaza el repositorio de categoría de medicamento
     private final CategoriaMedicamentoRepository categoriaMedicamentoRepository;
 
     public CategoriaMedicamentoService(CategoriaMedicamentoRepository categoriaMedicamentoRepository) {

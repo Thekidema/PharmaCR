@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{general/fragmentos :: head}"></head>
+    <body>
+        <header th:replace="~{general/fragmentos :: header}"></header>
+        <section th:replace="~{general/fragmentos :: mostrarToast}"></section>
+
+        <section class="py-4">
+            <div class="container">
+
+                <h2><i class="fas fa-chart-line"></i> [[#{reporte.ventas.titulo}]]</h2>
+
+                <!-- Filtro por rango de fechas (HU-13) -->
+                <div class="card my-3">
+                    <div class="card-header bg-primary text-white">[[#{reporte.rango}]]</div>
+                    <div class="card-body">
+                        <form method="GET" th:action="@{/reportes/ventas}" class="row g-2 align-items-end">
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">[[#{reporte.desde}]]</label>
+                                <input type="date" name="desde" class="form-control" th:value="${desde}"/>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">[[#{reporte.hasta}]]</label>
+                                <input type="date" name="hasta" class="form-control" th:value="${hasta}"/>
+                            </div>
+                            <div class="col-md-4 d-grid">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search"></i> [[#{accion.buscar}]]</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Indicadores del periodo -->
+                <div class="row my-3">
+                    <div class="col-md-6">
+                        <div class="card text-white bg-success">
+                            <div class="card-body text-center">
+                                <h3>₡[[${totalVendido}]]</h3>
+                                <p class="mb-0">[[#{reporte.totalVendido}]]</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card text-white bg-primary">
+                            <div class="card-body text-center">
+                                <h3>[[${transacciones}]]</h3>
+                                <p class="mb-0">[[#{reporte.transacciones}]]</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Medicamentos mas vendidos del periodo -->
+                <div class="card my-3">
+                    <div class="card-header bg-warning">[[#{reporte.masVendidos}]]</div>
+                    <div class="card-body">
+                        <p th:if="${#lists.isEmpty(masVendidos)}" class="text-muted">[[#{reporte.ventas.vacio}]]</p>
+                        <div class="table-responsive">
+                            <table th:unless="${#lists.isEmpty(masVendidos)}" class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>[[#{medicamento.nombre}]]</th>
+                                    <th class="text-center">[[#{reporte.unidades}]]</th>
+                                    <th class="text-end">[[#{venta.total}]]</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Cada fila viene como [nombre, unidades, monto] de la consulta agrupada -->
+                                <tr th:each="fila : ${masVendidos}">
+                                    <td>[[${fila[0]}]]</td>
+                                    <td class="text-center">[[${fila[1]}]]</td>
+                                    <td class="text-end">₡[[${fila[2]}]]</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detalle de las ventas del periodo -->
+                <div class="card my-3">
+                    <div class="card-header bg-secondary text-white">[[#{venta.listado.titulo}]]</div>
+                    <div class="card-body">
+                        <p th:if="${#lists.isEmpty(ventas)}" class="text-muted">[[#{venta.listado.vacio}]]</p>
+                        <div class="table-responsive">
+                            <table th:unless="${#lists.isEmpty(ventas)}" class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>[[#{venta.numero}]]</th>
+                                    <th>[[#{venta.fecha}]]</th>
+                                    <th>[[#{venta.usuario}]]</th>
+                                    <th class="text-end">[[#{venta.total}]]</th>
+                                    <th class="text-center">[[#{plantilla.acciones}]]</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="v : ${ventas}">
+                                    <td>[[${v.idVenta}]]</td>
+                                    <td th:text="${#temporals.format(v.fecha, 'dd/MM/yyyy HH:mm')}"></td>
+                                    <td>[[${v.usuario.username}]]</td>
+                                    <td class="text-end">₡[[${v.total}]]</td>
+                                    <td class="text-center">
+                                        <a th:href="@{/venta/detalle/{id}(id=${v.idVenta})}"
+                                           class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-eye"></i> [[#{accion.ver}]]</a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <footer th:replace="~{general/fragmentos :: footer}"></footer>
+    </body>
+</html>

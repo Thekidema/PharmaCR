@@ -1,0 +1,26 @@
+
+.card:hover {
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
+    transition: box-shadow .2s ease-in-out;
+}
+
+
+@media print {
+    header,
+    footer,
+    .no-imprimir,
+    .navbar,
+    .btn {
+        display: none !important;
+    }
+
+    body {
+        background: #fff;
+        font-size: 12pt;
+    }
+
+    .card {
+        border: none !important;
+        box-shadow: none !important;
+    }
+}

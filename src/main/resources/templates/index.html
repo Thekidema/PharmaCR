@@ -1,6 +1,7 @@
-````````````````````````````````````````<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="http://www.thymeleaf.org">
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
     <head th:replace="~{general/fragmentos :: head}"></head>
     <body>
         <header th:replace="~{general/fragmentos :: header}"></header>
@@ -15,60 +16,89 @@
                     </div>
                 </div>
 
-                <div class="row">
-                    <div class="col-md-3 mb-3">
-                        <div class="card text-center border-primary h-100">
-                            <div class="card-body">
-                                <i class="fas fa-pills fa-2x text-primary mb-2"></i>
-                                <h5 class="card-title">[[#{index.medicamentosActivos}]]</h5>
-                                <p class="card-text display-6">[[${totalMedicamentos}]]</p>
-                                <a th:href="@{/medicamento/listado}" class="btn btn-primary btn-sm">[[#{accion.ver}]]</a>
+                <!-- Visitante sin autenticar: solo la invitacion a ingresar.
+                     Los indicadores del negocio no se muestran a quien no ha iniciado sesion -->
+                <div class="row justify-content-center" sec:authorize="!isAuthenticated()">
+                    <div class="col-md-5 text-center">
+                        <a th:href="@{/login}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-right-to-bracket"></i> [[#{login.login}]]</a>
+                    </div>
+                </div>
+
+                <!-- HU-20: panel principal con los indicadores del dia -->
+                <div sec:authorize="isAuthenticated()">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <div class="card text-center border-primary h-100">
+                                <div class="card-body">
+                                    <i class="fas fa-pills fa-2x text-primary mb-2"></i>
+                                    <h5 class="card-title">[[#{index.medicamentosActivos}]]</h5>
+                                    <p class="card-text display-6">[[${totalMedicamentos}]]</p>
+                                    <a th:href="@{/medicamento/listado}" class="btn btn-primary btn-sm"
+                                       sec:authorize="hasRole('ROLE_ENCARGADO_INVENTARIO')">[[#{accion.ver}]]</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card text-center border-success h-100">
+                                <div class="card-body">
+                                    <i class="fas fa-cash-register fa-2x text-success mb-2"></i>
+                                    <h5 class="card-title">[[#{index.ventasDelDia}]]</h5>
+                                    <p class="card-text display-6">[[${totalVentasDelDia}]]</p>
+                                    <p class="text-muted">₡ [[${montoVentasDelDia}]]</p>
+                                    <a th:href="@{/venta/listado}" class="btn btn-success btn-sm"
+                                       sec:authorize="hasRole('ROLE_FARMACEUTICO')">[[#{accion.ver}]]</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card text-center border-warning h-100">
+                                <div class="card-body">
+                                    <i class="fas fa-bell fa-2x text-warning mb-2"></i>
+                                    <h5 class="card-title">[[#{index.alertasActivas}]]</h5>
+                                    <p class="card-text display-6">[[${totalAlertas}]]</p>
+                                    <a th:href="@{/alerta/listado}" class="btn btn-warning btn-sm"
+                                       sec:authorize="hasRole('ROLE_ENCARGADO_INVENTARIO')">[[#{accion.ver}]]</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card text-center border-info h-100">
+                                <div class="card-body">
+                                    <i class="fas fa-hourglass-half fa-2x text-info mb-2"></i>
+                                    <h5 class="card-title">[[#{index.porVencer}]]</h5>
+                                    <p class="card-text display-6">[[${totalPorVencer}]]</p>
+                                    <p class="text-muted">[[${diasPorVencer}]] [[#{reporte.dias}]]</p>
+                                    <a th:href="@{/reportes/inventario}" class="btn btn-info btn-sm"
+                                       sec:authorize="hasRole('ROLE_ADMIN')">[[#{accion.ver}]]</a>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-3 mb-3">
-                        <div class="card text-center border-success h-100">
-                            <div class="card-body">
-                                <i class="fas fa-cash-register fa-2x text-success mb-2"></i>
-                                <h5 class="card-title">[[#{index.ventasDelDia}]]</h5>
-                                <p class="card-text display-6">[[${totalVentasDelDia}]]</p>
-                                <p class="text-muted">₡ [[${montoVentasDelDia}]]</p>
-                                <a th:href="@{/venta/listado}" class="btn btn-success btn-sm">[[#{accion.ver}]]</a>
+
+                    <div class="row mt-4" th:if="${!alertas.isEmpty()}">
+                        <div class="col-md-6">
+                            <div class="alert alert-warning">
+                                <h5><i class="fas fa-triangle-exclamation"></i> [[#{index.alertasActivas}]]</h5>
+                                <ul class="mb-0">
+                                    <li th:each="a : ${alertas}">[[${a.mensaje}]]</li>
+                                </ul>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <div class="card text-center border-warning h-100">
-                            <div class="card-body">
-                                <i class="fas fa-bell fa-2x text-warning mb-2"></i>
-                                <h5 class="card-title">[[#{index.alertasActivas}]]</h5>
-                                <p class="card-text display-6">[[${totalAlertas}]]</p>
-                                <a th:href="@{/alerta/listado}" class="btn btn-warning btn-sm">[[#{accion.ver}]]</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <div class="card text-center border-info h-100">
-                            <div class="card-body">
-                                <i class="fas fa-chart-column fa-2x text-info mb-2"></i>
-                                <h5 class="card-title">[[#{plantilla.reportes}]]</h5>
-                                <p class="card-text"><br/></p>
-                                <a th:href="@{/reportes/inventario}" class="btn btn-info btn-sm">[[#{reporte.inventario.titulo}]]</a>
+                        <div class="col-md-6" th:if="${!porVencer.isEmpty()}">
+                            <div class="alert alert-info">
+                                <h5><i class="fas fa-hourglass-half"></i> [[#{index.porVencer}]]</h5>
+                                <ul class="mb-0">
+                                    <li th:each="e : ${porVencer}">
+                                        [[${e.medicamento.nombre}]] — [[#{inventario.lote}]] [[${e.lote}]]
+                                        (<span th:text="${#temporals.format(e.fechaVencimiento, 'dd/MM/yyyy')}"></span>)
+                                    </li>
+                                </ul>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="row mt-4" th:if="${!alertas.isEmpty()}">
-                    <div class="col-md-12">
-                        <div class="alert alert-warning">
-                            <h5><i class="fas fa-triangle-exclamation"></i> [[#{index.alertasActivas}]]</h5>
-                            <ul class="mb-0">
-                                <li th:each="a : ${alertas}">[[${a.mensaje}]]</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
             </div>
         </section>
 

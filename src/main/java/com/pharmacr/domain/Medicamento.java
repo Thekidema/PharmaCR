@@ -9,6 +9,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -48,8 +49,15 @@ public class Medicamento implements Serializable {
     @NotNull
     private BigDecimal precio;
 
+    //Los stocks se comparan directamente en alertas y reportes: si llegaran nulos
+    @Column(nullable = false)
+    @NotNull
+    @PositiveOrZero
     private Integer stockActual;
 
+    @Column(nullable = false)
+    @NotNull
+    @PositiveOrZero
     private Integer stockMinimo;
 
     private boolean activo;

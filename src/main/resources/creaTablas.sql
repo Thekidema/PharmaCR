@@ -1,29 +1,16 @@
-
 drop database if exists pharmacr;
-
-drop user if exists usuario_pharmacr;
-drop user if exists usuario_reportes_pharmacr;
-
 
 create database pharmacr
   default character set utf8mb4
   default collate utf8mb4_unicode_ci;
 
-
-create user 'usuario_pharmacr'@'%' identified by 'PharmaCR_Clave.';
-create user 'usuario_reportes_pharmacr'@'%' identified by 'PharmaCR_Reportes.';
-
-
-grant select, insert, update, delete on pharmacr.* to 'usuario_pharmacr'@'%';
-grant select on pharmacr.* to 'usuario_reportes_pharmacr'@'%';
-flush privileges;
-
 use pharmacr;
+
 
 
 create table rol (
   id_rol        int not null auto_increment,
-  nombre        varchar(30) not null unique,
+  rol           varchar(30) not null unique,
   fecha_creacion     timestamp default current_timestamp,
   fecha_modificacion timestamp default current_timestamp on update current_timestamp,
   primary key (id_rol))
@@ -48,7 +35,7 @@ create table usuario (
   index ndx_correo (correo))
   engine = InnoDB;
 
--- Tabla de relación usuario-rol (un usuario puede tener varios roles)
+-- Tabla de relacion usuario-rol 
 create table usuario_rol (
   id_usuario    int not null,
   id_rol        int not null,
@@ -57,6 +44,21 @@ create table usuario_rol (
   primary key (id_usuario, id_rol),
   foreign key fk_usuarioRol_usuario (id_usuario) references usuario(id_usuario),
   foreign key fk_usuarioRol_rol (id_rol) references rol(id_rol))
+  engine = InnoDB;
+
+-- Tabla para codigos de verificacion de clave
+create table codigo_verificacion (
+  id_codigo         int not null auto_increment,
+  id_usuario        int not null,
+  codigo            varchar(6) not null,
+  fecha_expiracion  timestamp not null,
+  usado             boolean not null default false,
+  fecha_creacion     timestamp default current_timestamp,
+  fecha_modificacion timestamp default current_timestamp on update current_timestamp,
+  primary key (id_codigo),
+  index ndx_usuario (id_usuario),
+  index ndx_codigo (codigo),
+  foreign key fk_codigoVerificacion_usuario (id_usuario) references usuario(id_usuario))
   engine = InnoDB;
 
 -- Tabla de rutas y permisos de acceso
@@ -72,7 +74,7 @@ create table ruta (
   foreign key fk_ruta_rol (id_rol) references rol(id_rol))
   engine = InnoDB;
 
--- Tabla de categorías de medicamentos
+-- Tabla de categorias de medicamentos
 create table categoria_medicamento (
   id_categoria  int not null auto_increment,
   nombre        varchar(50) not null unique,
@@ -84,7 +86,7 @@ create table categoria_medicamento (
   index ndx_nombre (nombre))
   engine = InnoDB;
 
--- Tabla de medicamentos (catálogo principal)
+-- Tabla de medicamentos
 create table medicamento (
   id_medicamento  int not null auto_increment,
   id_categoria    int not null,
@@ -118,22 +120,24 @@ create table proveedor (
   index ndx_nombre_comercial (nombre_comercial))
   engine = InnoDB;
 
--- Tabla de ventas (encabezado de la transacción)
+-- Tabla de ventas 
 create table venta (
   id_venta      int not null auto_increment,
   id_usuario    int not null,
   fecha         timestamp default current_timestamp,
   total         decimal(12,2) not null check (total >= 0),
   estado        enum('Completada', 'Anulada') not null default 'Completada',
+  correo_cliente varchar(75) null,
   fecha_creacion     timestamp default current_timestamp,
   fecha_modificacion timestamp default current_timestamp on update current_timestamp,
   primary key (id_venta),
   index ndx_id_usuario (id_usuario),
   index ndx_fecha (fecha),
+  check (correo_cliente is null or correo_cliente regexp '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$'),
   foreign key fk_venta_usuario (id_usuario) references usuario(id_usuario))
   engine = InnoDB;
 
--- Tabla de detalle de ventas (líneas de cada venta)
+-- Tabla de detalle de ventas 
 create table detalle_venta (
   id_detalle        int not null auto_increment,
   id_venta          int not null,
@@ -151,7 +155,7 @@ create table detalle_venta (
   foreign key fk_detalle_medicamento (id_medicamento) references medicamento(id_medicamento))
   engine = InnoDB;
 
--- Tabla de entradas de inventario (compras a proveedores)
+-- Tabla de entradas de inventario
 create table entrada_inventario (
   id_entrada        int not null auto_increment,
   id_proveedor      int not null,
@@ -171,7 +175,7 @@ create table entrada_inventario (
   foreign key fk_entrada_usuario (id_usuario) references usuario(id_usuario))
   engine = InnoDB;
 
--- Tabla de salidas de inventario (ajustes, devoluciones, pérdidas)
+-- Tabla de salidas de inventario
 create table salida_inventario (
   id_salida         int not null auto_increment,
   id_medicamento    int not null,
@@ -187,7 +191,7 @@ create table salida_inventario (
   foreign key fk_salida_usuario (id_usuario) references usuario(id_usuario))
   engine = InnoDB;
 
--- Tabla de historial de movimientos de inventario (auditoría completa)
+-- Tabla de historial de movimientos de inventario 
 create table inventario_movimiento (
   id_movimiento     int not null auto_increment,
   id_medicamento    int not null,
@@ -207,7 +211,7 @@ create table inventario_movimiento (
   foreign key fk_movimiento_usuario (id_usuario) references usuario(id_usuario))
   engine = InnoDB;
 
--- Tabla de alertas de stock mínimo
+-- Tabla de alertas de stock minimo
 create table alerta (
   id_alerta         int not null auto_increment,
   id_medicamento    int not null,
@@ -221,7 +225,7 @@ create table alerta (
   foreign key fk_alerta_medicamento (id_medicamento) references medicamento(id_medicamento))
   engine = InnoDB;
 
--- Tabla de constantes de la aplicación
+-- Tabla de constantes de la aplicacion
 create table constante (
   id_constante  int auto_increment not null,
   atributo      varchar(50) not null unique,
@@ -231,74 +235,67 @@ create table constante (
   primary key (id_constante))
   engine = InnoDB;
 
--- ======================================================
--- SECCIÓN DE INSERCIÓN DE DATOS
--- ======================================================
+
 
 -- Roles del sistema
-insert into rol (nombre) values
+insert into rol (rol) values
   ('ADMIN'),
   ('FARMACEUTICO'),
   ('ENCARGADO_INVENTARIO');
 
 -- Usuarios del sistema (contraseñas: Admin@1234 / Farma@1234 / Invent@1234)
--- Contraseñas cifradas con BCrypt
+-- Contraseñas cifradas con BCrypt. Los hashes fueron regenerados en el
+-- Avance 3: los anteriores no correspondian a estas contraseñas.
 insert into usuario (username, password, nombre, apellidos, correo, telefono, activo) values
-  ('admin',      '$2a$10$P1.w58XvnaYQUQgZUCk4aO/RTRl8EValluCqB3S2VMLTbRt.tlre.', 'Carlos',   'Mora Vargas',     'admin@pharmacr.cr',      '2222-0001', true),
-  ('farma01',    '$2a$10$GkEj.ZzmQa/aEfDmtLIh3udIH5fMphx/35d0EYeqZL5uzgCJ0lQRi', 'Lucía',    'Rojas Jiménez',   'farma01@pharmacr.cr',    '2222-0002', true),
-  ('inv01',      '$2a$10$koGR7eS22Pv5KdaVJKDcge04ZB53iMiw76.UjHPY.XyVYlYqXnPbO', 'Roberto',  'Solano Ulate',    'inv01@pharmacr.cr',      '2222-0003', true);
+  ('admin',      '$2a$10$HzzxyMdq8t8tqRPKL2M26.xpwI1vwx0VQuFeXcPFDQnj34dvysH.i', 'Carlos',   'Mora Vargas',     'emachaves690@gmail.com',      '2222-0001', true),
+  ('farma01',    '$2a$10$9k6BUA.rUIeYSE7WBMtM2OMWkS0Z3tDyVZWLqEdZ/bMW7UroDLnIC', 'Lucía',    'Rojas Jiménez',   'farma01@pharmacr.cr',    '2222-0002', true),
+  ('inv01',      '$2a$10$S/qqQN/krOM7511IXhIxO.LxL8tAvqAg1HfGfqZs.I4j4anumTvy6', 'Roberto',  'Solano Ulate',    'inv01@pharmacr.cr',      '2222-0003', true);
 
--- Asignación de roles
+-- Asignacion de roles
 insert into usuario_rol (id_usuario, id_rol) values
   (1, 1), (1, 2), (1, 3),   -- admin tiene todos los roles
   (2, 2),                    -- farma01 solo FARMACEUTICO
   (3, 3);                    -- inv01 solo ENCARGADO_INVENTARIO
 
+
+insert into ruta (ruta, requiere_rol) values
+  ('/',                 false),
+  ('/index',            false),
+  ('/login',            false),
+  ('/logout',           false),
+  ('/acceso_denegado',  false),
+  ('/errores/**',       false),
+  ('/recuperar_clave',          false),
+  ('/recuperar_clave/**',       false),
+  ('/css/**',           false),
+  ('/js/**',            false),
+  ('/img/**',           false),
+  ('/fav/**',           false),
+  ('/webjars/**',       false);
+
+-- Rutas especificas del FARMACEUTICO.
+
+insert into ruta (ruta, id_rol) values
+  ('/medicamento/disponibilidad', 2),
+  ('/medicamento/buscar',         2),
+  ('/venta/**',                   2);
+
 -- Rutas protegidas por rol (ADMIN)
 insert into ruta (ruta, id_rol) values
   ('/usuario/**',               1),
-  ('/rol/**',                   1),
   ('/usuario_rol/**',           1),
-  ('/ruta/**',                  1),
   ('/constante/**',             1),
-  ('/reportes/ventas',          1),
-  ('/reportes/inventario',      1),
-  ('/reportes/movimientos',     1),
-  ('/dashboard',                1);
-
--- Rutas protegidas por rol (FARMACEUTICO)
-insert into ruta (ruta, id_rol) values
-  ('/venta/nueva',              2),
-  ('/venta/guardar',            2),
-  ('/venta/listado',            2),
-  ('/medicamento/disponibilidad', 2),
-  ('/medicamento/buscar',       2),
-  ('/venta/comprobante/**',     2);
+  ('/reportes/**',              1),
+  ('/respaldo/**',              1);
 
 -- Rutas protegidas por rol (ENCARGADO_INVENTARIO)
 insert into ruta (ruta, id_rol) values
-  ('/medicamento/nuevo',        3),
-  ('/medicamento/guardar',      3),
-  ('/medicamento/modificar/**', 3),
-  ('/medicamento/desactivar/**',3),
+  ('/medicamento/**',           3),
   ('/proveedor/**',             3),
-  ('/inventario/entrada/**',    3),
-  ('/inventario/salida/**',     3),
+  ('/inventario/**',            3),
   ('/alerta/**',                3);
 
--- Rutas públicas (sin rol requerido)
-insert into ruta (ruta, requiere_rol) values
-  ('/',            false),
-  ('/index',       false),
-  ('/login',       false),
-  ('/errores/**',  false),
-  ('/403',         false),
-  ('/css/**',      false),
-  ('/js/**',       false),
-  ('/img/**',      false),
-  ('/webjars/**',  false);
-
--- Categorías de medicamentos
+-- Categorias de medicamentos
 insert into categoria_medicamento (nombre, descripcion, activo) values
   ('Analgésicos',       'Medicamentos para el alivio del dolor',                      true),
   ('Antibióticos',      'Medicamentos para combatir infecciones bacterianas',          true),
@@ -358,21 +355,21 @@ insert into detalle_venta (id_venta, id_medicamento, cantidad, precio_unitario, 
   (1, 9, 1, 5500.00,  5500.00),
   (2, 4, 2, 8500.00, 17000.00),
   (2, 7, 1, 4500.00,  4500.00),
-  (2, 11,1, 6900.00,  6900.00),   -- nota: sobrepasa el total de la venta intencionalmente para ejemplo
+  (2, 11,1, 6900.00,  6900.00),   
   (3, 5, 1,12000.00, 12000.00),
   (4, 10,1, 4800.00,  4800.00),
-  (4, 3, 1, 5800.00,  5800.00),   -- subtotal no cierra con total de venta 2 (datos de ejemplo)
+  (4, 3, 1, 5800.00,  5800.00),  
   (5, 1, 3, 3500.00, 10500.00),
   (5, 9, 1, 5500.00,  5500.00),
   (5, 14,1, 4600.00,  4600.00);
 
--- Salidas de inventario (ajustes)
+-- Salidas de inventario 
 insert into salida_inventario (id_medicamento, id_usuario, tipo, cantidad, motivo) values
   (7, 3, 'Perdida',    3, 'Caída del producto durante almacenamiento'),
   (15,3, 'Devolucion', 2, 'Devolución por error en pedido'),
   (8, 3, 'Ajuste',     2, 'Ajuste por diferencia en conteo físico');
 
--- Historial de movimientos (registro de auditoría)
+-- Historial de movimientos 
 insert into inventario_movimiento (id_medicamento, id_usuario, tipo_movimiento, cantidad, stock_resultante, motivo, id_referencia) values
   (1, 3, 'Entrada', 100, 100, 'Compra a CEFA',              1),
   (2, 3, 'Entrada',  80,  80, 'Compra a CEFA',              2),
@@ -387,11 +384,11 @@ insert into inventario_movimiento (id_medicamento, id_usuario, tipo_movimiento, 
   (15,3, 'Salida',    2,   3, 'Devolución por error',       2),
   (8, 3, 'Ajuste',    2,  20, 'Ajuste por conteo físico',   3);
 
--- Alertas de stock mínimo (generadas automáticamente por datos de ejemplo)
+-- Alertas de stock minimo 
 insert into alerta (id_medicamento, mensaje, activo) values
   (15, 'Tramadol 50mg está por debajo del stock mínimo (stock: 3, mínimo: 5)', true);
 
--- Constantes de la aplicación
+-- Constantes de la aplicacion
 insert into constante (atributo, valor) values
   ('app.nombre',              'PharmaCR'),
   ('app.version',             '1.0.0'),

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{general/fragmentos :: head}"></head>
+    <body>
+        <header th:replace="~{general/fragmentos :: header}"></header>
+        <section th:replace="~{general/fragmentos :: mostrarToast}"></section>
+
+        <main class="container my-5">
+            <div class="row justify-content-center">
+                <div class="col-md-5">
+                    <div class="card shadow">
+                        <div class="card-header bg-primary text-white text-center">
+                            <h4><i class="fas fa-key"></i> [[#{recuperar.solicitar.titulo}]]</h4>
+                        </div>
+                        <div class="card-body">
+                            <form method="POST" th:action="@{/recuperar_clave/solicitar}" class="was-validated">
+                                <div class="mb-3">
+                                    <label class="form-label">[[#{recuperar.correo}]]</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                        <input type="email" name="correo" class="form-control"
+                                               required="true" autofocus="true"/>
+                                    </div>
+                                </div>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-paper-plane"></i> [[#{recuperar.enviarCodigo}]]</button>
+                                </div>
+                            </form>
+                            <div class="text-center mt-3">
+                                <a th:href="@{/login}">[[#{recuperar.volverLogin}]]</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer th:replace="~{general/fragmentos :: footer}"></footer>
+    </body>
+</html>

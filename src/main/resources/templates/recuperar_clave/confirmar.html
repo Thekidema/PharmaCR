@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{general/fragmentos :: head}"></head>
+    <body>
+        <header th:replace="~{general/fragmentos :: header}"></header>
+        <section th:replace="~{general/fragmentos :: mostrarToast}"></section>
+
+        <main class="container my-5">
+            <div class="row justify-content-center">
+                <div class="col-md-5">
+                    <div class="card shadow">
+                        <div class="card-header bg-primary text-white text-center">
+                            <h4><i class="fas fa-lock"></i> [[#{recuperar.confirmar.titulo}]]</h4>
+                        </div>
+                        <div class="card-body">
+                            <form method="POST" th:action="@{/recuperar_clave/confirmar}" class="was-validated">
+                                <div class="mb-3">
+                                    <label class="form-label">[[#{recuperar.correo}]]</label>
+                                    <input type="email" name="correo" class="form-control"
+                                           th:value="${correo}" required="true"/>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">[[#{recuperar.codigo}]]</label>
+                                    <input type="text" name="codigo" class="form-control"
+                                           maxlength="6" pattern="\d{6}" required="true"/>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">[[#{recuperar.nuevaClave}]]</label>
+                                    <input type="password" name="nuevaClave" class="form-control"
+                                           minlength="8" required="true"/>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">[[#{recuperar.confirmarClave}]]</label>
+                                    <input type="password" name="confirmarClave" class="form-control"
+                                           minlength="8" required="true"/>
+                                </div>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-check"></i> [[#{recuperar.restablecer}]]</button>
+                                </div>
+                            </form>
+                            <div class="text-center mt-3">
+                                <a th:href="@{/recuperar_clave}">[[#{recuperar.solicitar.titulo}]]</a> ·
+                                <a th:href="@{/login}">[[#{recuperar.volverLogin}]]</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer th:replace="~{general/fragmentos :: footer}"></footer>
+    </body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+
+    <head th:replace="~{general/fragmentos :: head}"/>
+
+    <body>
+        <!-- fragmento 1 para agregar una constante nueva, usado en listado.html -->
+        <section th:fragment="agregar" class="col-md-5">
+            <div class="card">
+                <div class="card-header bg-primary text-white">[[#{accion.agregar}]]</div>
+                <div class="card-body">
+                    <form method="POST" th:action="@{/constante/guardar}"
+                          th:object="${constante}" class="was-validated">
+                        <input type="hidden" th:field="*{idConstante}"/>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">[[#{constante.atributo}]] *</label>
+                            <input type="text" th:field="*{atributo}" class="form-control"
+                                   th:classappend="${#fields.hasErrors('atributo')} ? 'is-invalid'" required="true"/>
+                            <div th:replace="~{general/fragmentos :: campoError(campo='atributo')}"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">[[#{constante.valor}]] *</label>
+                            <input type="text" th:field="*{valor}" class="form-control"
+                                   th:classappend="${#fields.hasErrors('valor')} ? 'is-invalid'" required="true"/>
+                            <div th:replace="~{general/fragmentos :: campoError(campo='valor')}"></div>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-check"></i> [[#{accion.guardar}]]</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- fragmento 2 para el listado de constantes, usado en listado.html -->
+        <section th:fragment="listado" class="col-md-7">
+            <div class="card">
+                <div class="card-header bg-secondary text-white d-flex justify-content-between">
+                    <span>[[#{constante.listado}]]</span>
+                    <span class="badge bg-light text-dark">[[${totalConstantes}]]</span>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-sm">
+                            <thead>
+                                <tr>
+                                    <th>[[#{constante.atributo}]]</th>
+                                    <th>[[#{constante.valor}]]</th>
+                                    <th class="text-center">[[#{plantilla.acciones}]]</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="c : ${constantes}">
+                                    <td>[[${c.atributo}]]</td>
+                                    <td>[[${c.valor}]]</td>
+                                    <td class="text-center">
+                                        <a th:href="@{/constante/modificar/{id}(id=${c.idConstante})}"
+                                           class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-pen"></i></a>
+                                        <form method="POST" th:action="@{/constante/eliminar}" class="d-inline">
+                                            <input type="hidden" name="idConstante" th:value="${c.idConstante}"/>
+                                            <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                <i class="fas fa-trash"></i></button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(constantes)}">
+                                    <td colspan="3" class="text-center text-muted">[[#{lista.vacia}]]</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- fragmento 3 que se utiliza en la pagina modifica.html -->
+        <section th:fragment="editar">
+            <div class="row">
+                <div class="col-md-3"></div>
+                <div class="col-md-6">
+                    <div class="d-grid mb-3">
+                        <a th:href="@{/constante/listado}" class="btn btn-primary">
+                            <i class="fas fa-arrow-left"></i> [[#{accion.regresar}]]</a>
+                    </div>
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">[[#{accion.actualizar}]]</div>
+                        <div class="card-body">
+                            <form method="POST" th:action="@{/constante/guardar}"
+                                  th:object="${constante}" class="was-validated">
+                                <input type="hidden" th:field="*{idConstante}"/>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">
+                                        
+                                        [[#{constante.atributo}]] *
+                                    </label>
+                                    <input type="text" th:field="*{atributo}" 
+                                           class="form-control"
+                                           th:classappend="${#fields.hasErrors('atributo')} ? 'is-invalid'" 
+                                           required="true"/>
+                                    <div
+                                        th:replace="~{general/fragmentos :
+                                        : campoError(campo='atributo')}">
+                                            
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">
+                                        [[#{constante.valor}]] *
+                                    </label>
+                                    <input type="text" th:field="*{valor}" 
+                                           class="form-control"
+                                           th:classappend="${#fields.hasErrors('valor')} ? 'is-invalid'" 
+                                           required="true"/>
+                                    <div 
+                                        th:replace="~{general/fragmentos :
+                                        : campoError(campo='valor')}">
+                                            
+                                    </div>
+                                </div>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-check"></i> [[#{accion.guardar}]]</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </body>
