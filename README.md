@@ -32,11 +32,31 @@ PharmaCR es una aplicación web diseñada para centralizar y automatizar las ope
 
 | Capa | Tecnología |
 |------|------------|
-| Backend | Java 17 + Spring Boot |
-| Frontend | Thymeleaf + Bootstrap 5 |
+| Backend | Java 21 + Spring Boot 4.0.6 |
+| Seguridad | Spring Security 6 + BCrypt |
+| Frontend | Thymeleaf + Bootstrap 5.3 |
 | Persistencia | Hibernate / JPA |
-| Base de datos | MySQL |
+| Base de datos | MySQL 8 (local) / Aiven (nube) |
+| Almacenamiento de imágenes | Firebase Storage |
 | Control de versiones | Git + GitHub |
+
+---
+
+## Seguridad
+
+El acceso se controla con **Spring Security**. Las rutas no están escritas en el
+código: se cargan desde la tabla `ruta`, que asocia cada patrón de URL con el rol
+que puede entrar. Agregar o quitar un permiso es cambiar un registro en la base
+de datos, sin recompilar.
+
+Las contraseñas se guardan cifradas con **BCrypt**. `creaTablas.sql` crea tres
+usuarios de prueba (`admin`, `farma01`, `inv01`) con contraseña igual al
+nombre de usuario en mayúscula inicial + `@1234` (ej. `Admin@1234`).
+
+> **Solo para entorno local.** Estas credenciales son públicas por estar en
+> este repositorio. Si se usa la base de datos compartida en la nube (Aiven),
+> deben cambiarse ahí antes de exponerla, y nunca reutilizarse en un entorno
+> real o de producción.
 
 ---
 
@@ -44,7 +64,7 @@ PharmaCR es una aplicación web diseñada para centralizar y automatizar las ope
 
 ### Prerrequisitos
 
-- Java 17 o superior instalado
+- Java 21 o superior instalado
 - Maven 3.8 o superior
 - MySQL 8.0 o superior
 - Git
@@ -55,13 +75,41 @@ PharmaCR es una aplicación web diseñada para centralizar y automatizar las ope
 git clone https://github.com/Thekidema/PharmaCR.git
 ```
 
-### Configurar la base de datos
+### Base de datos
 
-Crear la base de datos en MySQL:
+Por defecto `application.properties` apunta a MySQL local. Crear el esquema con:
 
-```sql
-CREATE DATABASE pharmacr;
+```bash
+sudo mysql < src/main/resources/creaTablas.sql
 ```
+
+Para trabajar contra la base compartida en la nube (Aiven) en su lugar, crear
+`src/main/resources/application-nube.properties` (está en `.gitignore`, nunca
+se sube) con estas tres líneas y las credenciales que comparte el equipo por
+fuera de git:
+
+```properties
+spring.datasource.url=jdbc:mysql://<host-aiven>:<puerto>/pharmacr?sslMode=REQUIRED
+spring.datasource.username=avnadmin
+spring.datasource.password=<clave-compartida-por-el-equipo>
+```
+
+Spring lo importa automáticamente si el archivo existe y sobreescribe la
+configuración local — no hace falta comentar ni descomentar nada. **Las
+credenciales de la nube nunca deben escribirse en `application.properties`.**
+
+### Ejecutar
+
+```bash
+mvn spring-boot:run
+```
+
+La aplicación queda en `http://localhost:8080`.
+
+> Aiven apaga el servicio por inactividad en el plan gratuito
+
+### Fotografías de usuario (Firebase Storage)
+
 
 ---
 
@@ -82,8 +130,8 @@ CREATE DATABASE pharmacr;
 | Avance | Estado |
 |--------|--------|
 | Avance 1 | Entregado |
-| Avance 2 | Pendiente |
-| Avance 3 | Pendiente |
+| Avance 2 | Entregado |
+| Avance 3 | Módulo de seguridad, cierre de historias y base de datos en la nube |
 | Entrega final | Pendiente |
 
 ---
