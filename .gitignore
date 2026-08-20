@@ -16,3 +16,5 @@ nb-configuration.xml
 .DS_Store
 
 src/main/resources/firebase/*.json
+src/main/resources/application-local.properties
+nbactions.xml
