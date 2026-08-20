@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{general/fragmentos :: head}"></head>
+    <body>
+        <header th:replace="~{general/fragmentos :: header}"></header>
+        <section th:replace="~{general/fragmentos :: mostrarToast}"></section>
+
+        <section class="py-4">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-md-7">
+                        <div class="card">
+                            <div class="card-header bg-primary text-white">
+                                <h4><i class="fas fa-database"></i> [[#{respaldo.titulo}]]</h4>
+                            </div>
+                            <div class="card-body text-center">
+                                <p>[[#{respaldo.descripcion}]]</p>
+                                <p class="text-muted">
+                                    [[#{respaldo.baseDatos}]]: <strong>[[${nombreBaseDatos}]]</strong></p>
+                                <a th:href="@{/respaldo/descargar}" class="btn btn-success btn-lg">
+                                    <i class="fas fa-download"></i> [[#{respaldo.descargar}]]</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer th:replace="~{general/fragmentos :: footer}"></footer>
+    </body>
+</html>

@@ -4,12 +4,12 @@
       xmlns:th="http://www.thymeleaf.org">
 
     <head th:replace="~{general/fragmentos :: head}"></head>
-    <body>
+    <body th:attr="data-reabrir-modal=${reabrirModal}">
         <header th:replace="~{general/fragmentos :: header}"></header>
 
         <section th:replace="~{usuario/fragmentos :: agregar}"/>
         <section th:replace="~{usuario/fragmentos :: listado}"/>
-        <section th:replace="~{usuario/fragmentos :: confirmarEliminar}"></section>
+        <section th:replace="~{general/fragmentos :: confirmarEliminar(accion='/usuario/eliminar', campoId='idUsuario')}"></section>
         <section th:replace="~{general/fragmentos :: mostrarToast}"></section>
 
         <footer th:replace="~{general/fragmentos :: footer}"></footer>

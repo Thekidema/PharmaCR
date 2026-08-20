@@ -2,6 +2,8 @@ package com.pharmacr.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -34,8 +36,8 @@ public class SalidaInventario implements Serializable {
 
     @Column(nullable = false, length = 20)
     @NotNull
-    @Size(max = 20)
-    private String tipo;
+    @Enumerated(EnumType.STRING)
+    private TipoSalida tipo;
 
     @Column(nullable = false)
     @NotNull

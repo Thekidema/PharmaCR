@@ -1,12 +1,15 @@
 package com.pharmacr.service;
 
 import com.pharmacr.domain.DetalleVenta;
+import com.pharmacr.domain.EstadoVenta;
+import com.pharmacr.domain.Item;
+import com.pharmacr.domain.TipoMovimiento;
 import com.pharmacr.domain.Usuario;
 import com.pharmacr.domain.Venta;
 import com.pharmacr.repository.DetalleVentaRepository;
-import com.pharmacr.repository.MedicamentoRepository;
 import com.pharmacr.repository.VentaRepository;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -18,20 +21,18 @@ public class VentaService {
 
     private final VentaRepository ventaRepository;
     private final DetalleVentaRepository detalleVentaRepository;
-    private final MedicamentoRepository medicamentoRepository;
-    private final AlertaService alertaService;
+    private final MedicamentoService medicamentoService;
 
     public VentaService(VentaRepository ventaRepository, DetalleVentaRepository detalleVentaRepository,
-            MedicamentoRepository medicamentoRepository, AlertaService alertaService) {
+            MedicamentoService medicamentoService) {
         this.ventaRepository = ventaRepository;
         this.detalleVentaRepository = detalleVentaRepository;
-        this.medicamentoRepository = medicamentoRepository;
-        this.alertaService = alertaService;
+        this.medicamentoService = medicamentoService;
     }
 
     @Transactional(readOnly = true)
     public List<Venta> getVentas() {
-        return ventaRepository.findAll();
+        return ventaRepository.findAllConUsuario();
     }
 
     @Transactional(readOnly = true)
@@ -44,41 +45,113 @@ public class VentaService {
         return detalleVentaRepository.findByVenta(venta);
     }
 
-    // Registra la venta, descuenta inventario y no permite vender más del stock (HU-08)
+    // HU-13: reporte de ventas por rango de fechas
+    @Transactional(readOnly = true)
+    public List<Venta> getVentasPorRango(LocalDateTime desde, LocalDateTime hasta) {
+        return ventaRepository.findPorRango(desde, hasta);
+    }
+
+    @Transactional(readOnly = true)
+    public long contarPorRango(LocalDateTime desde, LocalDateTime hasta) {
+        return ventaRepository.contarPorRango(desde, hasta);
+    }
+
+    @Transactional(readOnly = true)
+    public BigDecimal getTotalPorRango(LocalDateTime desde, LocalDateTime hasta) {
+        var total = ventaRepository.sumarPorRango(desde, hasta);
+        return total == null ? BigDecimal.ZERO : total;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Object[]> getMasVendidos(LocalDateTime desde, LocalDateTime hasta) {
+        return ventaRepository.findMasVendidos(desde, hasta);
+    }
+
+    //HU-20: cuenta las ventas del dia en la consulta, sin traerlas todas a memoria
+    @Transactional(readOnly = true)
+    public long contarVentasDelDia() {
+        var hoy = LocalDate.now();
+        return ventaRepository.contarPorRango(hoy.atStartOfDay(), hoy.plusDays(1).atStartOfDay());
+    }
+
+    @Transactional(readOnly = true)
+    public BigDecimal totalVentasDelDia() {
+        var hoy = LocalDate.now();
+        var total = ventaRepository.sumarPorRango(hoy.atStartOfDay(), hoy.plusDays(1).atStartOfDay());
+        return total == null ? BigDecimal.ZERO : total;
+    }
+
+     // HU-08: registra la venta completa con todas sus lineas, descuenta elinventario de cada medicamento y deja el rastro en la bitacora
+    public Venta registrar(Usuario usuario, List<Item> items) {
+        return registrar(usuario, items, null);
+    }
+
+    //Igual que registrar(usuario, items), pero permite indicar el correo delcliente para poder enviarle la factura despues HU-18
     @Transactional
-    public void registrar(Usuario usuario, Integer idMedicamento, Integer cantidad) {
-        var medicamento = medicamentoRepository.findById(idMedicamento);
-        if (medicamento.isEmpty()) {
-            throw new IllegalArgumentException("El medicamento seleccionado no existe.");
-        }
-        var med = medicamento.get();
-        if (!med.isActivo()) {
-            throw new IllegalArgumentException("El medicamento " + med.getNombre() + " está desactivado.");
-        }
-        if (cantidad > med.getStockActual()) {
-            throw new IllegalArgumentException("No hay stock suficiente de " + med.getNombre()
-                    + " (stock: " + med.getStockActual() + ", solicitado: " + cantidad + ").");
+    public Venta registrar(Usuario usuario, List<Item> items, String correoCliente) {
+        if (items == null || items.isEmpty()) {
+            throw new IllegalArgumentException("Debe agregar al menos un medicamento a la venta.");
         }
 
-        var subtotal = med.getPrecio().multiply(BigDecimal.valueOf(cantidad));
+        //Primero se valida todo el carrito: asi no se descuenta stock de una linea
+        
+       
+        for (Item item : items) {
+            var med = medicamentoService.getMedicamento(item.getIdMedicamento())
+                    .orElseThrow(() -> new IllegalArgumentException("El medicamento seleccionado no existe."));
+            medicamentoService.validarDisponibilidad(med, item.getCantidad());
+        }
+
+        var total = Item.sumarTotal(items);
 
         var venta = new Venta();
         venta.setUsuario(usuario);
         venta.setFecha(LocalDateTime.now());
-        venta.setTotal(subtotal);
-        venta.setEstado("Completada");
+        venta.setTotal(total);
+        venta.setEstado(EstadoVenta.Completada);
+        venta.setCorreoCliente(correoCliente);
         ventaRepository.save(venta);
 
-        var detalle = new DetalleVenta();
-        detalle.setVenta(venta);
-        detalle.setMedicamento(med);
-        detalle.setCantidad(cantidad);
-        detalle.setPrecioUnitario(med.getPrecio());
-        detalle.setSubtotal(subtotal);
-        detalleVentaRepository.save(detalle);
+        for (Item item : items) {
+            var med = medicamentoService.getMedicamento(item.getIdMedicamento()).orElseThrow();
 
-        med.setStockActual(med.getStockActual() - cantidad);
-        medicamentoRepository.save(med);
-        alertaService.revisar(med);
+            var detalle = new DetalleVenta();
+            detalle.setVenta(venta);
+            detalle.setMedicamento(med);
+            detalle.setCantidad(item.getCantidad());
+            //Precio historico: el que tenia el medicamento cuando se hizo la venta
+            detalle.setPrecioUnitario(item.getPrecio());
+            detalle.setSubtotal(item.getSubtotal());
+            detalleVentaRepository.save(detalle);
+
+    
+            medicamentoService.ajustarStockYRegistrar(item.getIdMedicamento(), item.getCantidad(), false,
+                    "No hay stock suficiente de " + med.getNombre()
+                            + ": el inventario cambió mientras se procesaba la venta. Intente de nuevo.",
+                    usuario, TipoMovimiento.Venta, "Venta #" + venta.getIdVenta(), venta.getIdVenta());
+        }
+
+        return venta;
+    }
+
+    //Anula una venta ya registrada: repone el stock de cada linea, deja rastro en la bitacora como Ajuste y marca la venta como Anulada
+     
+    @Transactional
+    public void anular(Integer idVenta, Usuario usuario) {
+        var venta = ventaRepository.findById(idVenta)
+                .orElseThrow(() -> new IllegalArgumentException("La venta no existe."));
+        if (venta.getEstado() == EstadoVenta.Anulada) {
+            throw new IllegalStateException("La venta ya está anulada.");
+        }
+
+        for (DetalleVenta detalle : detalleVentaRepository.findByVenta(venta)) {
+            var idMedicamento = detalle.getMedicamento().getIdMedicamento();
+            medicamentoService.ajustarStockYRegistrar(idMedicamento, detalle.getCantidad(), true,
+                    "El medicamento ya no existe.", usuario, TipoMovimiento.Ajuste,
+                    "Anulación venta #" + venta.getIdVenta(), venta.getIdVenta());
+        }
+
+        venta.setEstado(EstadoVenta.Anulada);
+        ventaRepository.save(venta);
     }
 }

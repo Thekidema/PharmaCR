@@ -17,7 +17,8 @@
 
                 <div class="row">
                     <div class="col-md-12">
-                        <table class="table table-striped table-hover table-bordered">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover table-bordered">
                             <thead class="table-primary">
                                 <tr>
                                     <th>[[#{medicamento.codigo}]]</th>
@@ -37,11 +38,17 @@
                                         <span th:if="${m.stockActual == 0}" class="badge bg-danger">[[#{medicamento.sinStock}]]</span>
                                     </td>
                                     <td>
-                                        <ul class="mb-0 list-unstyled">
-                                            <li th:each="e : ${entradas}"
-                                                th:if="${e.medicamento.idMedicamento == m.idMedicamento}">
+                                        <!-- Los lotes ya vienen ordenados por vencimiento desde el servicio;
+                                             el primero es el que vence mas pronto y se resalta (HU-07) -->
+                                        <span th:if="${lotes[m.idMedicamento] == null}"
+                                              class="text-muted">[[#{medicamento.sinStock}]]</span>
+                                        <ul class="mb-0 list-unstyled" th:unless="${lotes[m.idMedicamento] == null}">
+                                            <li th:each="e, it : ${lotes[m.idMedicamento]}"
+                                                th:classappend="${it.first} ? 'fw-bold text-danger' : ''">
                                                 <i class="fas fa-boxes-stacked text-muted"></i>
-                                                [[${e.lote}]] — [[${e.fechaVencimiento}]]
+                                                [[${e.lote}]] —
+                                                <span th:text="${#temporals.format(e.fechaVencimiento, 'dd/MM/yyyy')}"></span>
+                                                <span th:if="${it.first}" class="badge bg-danger ms-1">[[#{medicamento.lote.proximo}]]</span>
                                             </li>
                                         </ul>
                                     </td>
@@ -51,6 +58,7 @@
                                 </tr>
                             </tbody>
                         </table>
+                        </div>
                     </div>
                 </div>
             </div>

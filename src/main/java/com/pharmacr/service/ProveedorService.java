@@ -4,7 +4,6 @@ import com.pharmacr.domain.Proveedor;
 import com.pharmacr.repository.ProveedorRepository;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +24,7 @@ public class ProveedorService {
         }
         return proveedorRepository.findAll();
     }
-    //Recupera un registro de proveedor -si existe-
+    //Recupera un registro de proveedor -si
 
     @Transactional(readOnly = true)
     public Optional<Proveedor> getProveedor(Integer idProveedor) {
@@ -38,18 +37,14 @@ public class ProveedorService {
         proveedorRepository.save(proveedor);
     }
 
-    //Si idProveedor existe, se elimina... si no tiene información asociada
+    //Baja logica del proveedor: no se elimina fisicamente, se marca como inactivo
     @Transactional
-    public void delete(Integer idProveedor) {
-        //Se valida que el proveedor exista...
-        if (!proveedorRepository.existsById(idProveedor)) {
-            //Se lanza una excepción para indicarle al usuario que no se eliminó
+    public void desactivar(Integer idProveedor) {
+        var proveedor = proveedorRepository.findById(idProveedor);
+        if (proveedor.isEmpty()) {
             throw new IllegalArgumentException("El proveedor con ID " + idProveedor + " no existe!");
         }
-        try {
-            proveedorRepository.deleteById(idProveedor);
-        } catch (DataIntegrityViolationException e) {
-            throw new IllegalStateException("No se puede eliminar el proveedor, tiene información asociada");
-        }
+        proveedor.get().setActivo(false);
+        proveedorRepository.save(proveedor.get());
     }
 }

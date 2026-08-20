@@ -25,37 +25,55 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <form th:action='@{/usuario/guardar}' th:object='${usuario}'
-                              class='was-validated' method="post">
+                              class='was-validated' method="post" enctype="multipart/form-data">
                             <div class="modal-body">
 
                                 <div class='mb-3'>
                                     <label>[[#{usuario.username}]]</label>
-                                    <input type="text" name='username' class='form-control' required="true"/>
+                                    <input type="text" th:field="*{username}" class='form-control'
+                                           th:classappend="${#fields.hasErrors('username')} ? 'is-invalid'" required="true"/>
+                                    <div th:replace="~{general/fragmentos :: campoError(campo='username')}"></div>
                                 </div>
 
                                 <div class='mb-3'>
                                     <label>[[#{usuario.password}]]</label>
-                                    <input type="password" name='password' class='form-control' required="true"/>
+                                    <!-- Sin th:field a proposito: no se reenvia la clave en texto plano al navegador -->
+                                    <input type="password" name='password' class='form-control'
+                                           th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'" required="true"/>
+                                    <div th:replace="~{general/fragmentos :: campoError(campo='password')}"></div>
                                 </div>
 
                                 <div class='mb-3'>
                                     <label>[[#{usuario.nombre}]]</label>
-                                    <input type="text" name='nombre' class='form-control' required="true"/>
+                                    <input type="text" th:field="*{nombre}" class='form-control'
+                                           th:classappend="${#fields.hasErrors('nombre')} ? 'is-invalid'" required="true"/>
+                                    <div th:replace="~{general/fragmentos :: campoError(campo='nombre')}"></div>
                                 </div>
 
                                 <div class='mb-3'>
                                     <label>[[#{usuario.apellidos}]]</label>
-                                    <input type="text" name='apellidos' class='form-control' required="true"/>
+                                    <input type="text" th:field="*{apellidos}" class='form-control'
+                                           th:classappend="${#fields.hasErrors('apellidos')} ? 'is-invalid'" required="true"/>
+                                    <div th:replace="~{general/fragmentos :: campoError(campo='apellidos')}"></div>
                                 </div>
 
                                 <div class='mb-3'>
                                     <label>[[#{usuario.correo}]]</label>
-                                    <input type="email" name='correo' class='form-control' required="true"/>
+                                    <input type="email" th:field="*{correo}" class='form-control'
+                                           th:classappend="${#fields.hasErrors('correo')} ? 'is-invalid'" required="true"/>
+                                    <div th:replace="~{general/fragmentos :: campoError(campo='correo')}"></div>
                                 </div>
 
                                 <div class='mb-3'>
                                     <label>[[#{usuario.telefono}]]</label>
-                                    <input type="text" name='telefono' class='form-control'/>
+                                    <input type="text" th:field="*{telefono}" class='form-control'
+                                           th:classappend="${#fields.hasErrors('telefono')} ? 'is-invalid'"/>
+                                    <div th:replace="~{general/fragmentos :: campoError(campo='telefono')}"></div>
+                                </div>
+
+                                <div class='mb-3'>
+                                    <label>[[#{usuario.imagen}]]</label>
+                                    <input type="file" name='imagenFile' class='form-control' accept="image/*"/>
                                 </div>
 
                                 <div class='mb-3'>
@@ -64,13 +82,13 @@
                                         <input class="form-check-input" type="checkbox"
                                                name="idsRoles" th:value="${r.idRol}"
                                                th:id="'rolNuevo'+${r.idRol}"/>
-                                        <label class="form-check-label" th:for="'rolNuevo'+${r.idRol}">[[${r.nombre}]]</label>
+                                        <label class="form-check-label" th:for="'rolNuevo'+${r.idRol}">[[${r.rol}]]</label>
                                     </div>
                                 </div>
 
                                 <div class='mb-3'>
                                     <label>[[#{usuario.activo}]]</label>
-                                    <input type="checkbox" name='activo' class='form-check-input'/>
+                                    <input type="checkbox" th:field="*{activo}" class='form-check-input'/>
                                 </div>
 
                             </div>
@@ -93,9 +111,10 @@
                     <div class="card p-2">
                         <div class="card-header"><h4>[[#{usuario.listado}]]</h4></div>
                         <div class="card-body">
-                            <div th:if="${usuarios != null and !usuarios.empty}">
+                            <div class="table-responsive" th:if="${usuarios != null and !usuarios.empty}">
                                 <table class="table table-striped table-hover">
                                     <thead><tr><th>#</th>
+                                            <th></th>
                                             <th>[[#{usuario.username}]]</th>
                                             <th>[[#{usuario.nombre}]]</th>
                                             <th>[[#{usuario.correo}]]</th>
@@ -108,14 +127,21 @@
                                     <tbody>
                                         <tr th:each="u : ${usuarios}">
                                             <td>[[${u.idUsuario}]]</td>
+                                            <td>
+                                                <img th:if="${u.rutaImagen != null}" th:src="${u.rutaImagen}"
+                                                     class="rounded-circle" height="36" width="36"
+                                                     style="object-fit: cover;" alt="foto"/>
+                                                <i th:if="${u.rutaImagen == null}"
+                                                   class="fas fa-user-circle fa-2x text-muted"></i>
+                                            </td>
                                             <td>[[${u.username}]]</td>
                                             <td>[[${u.nombre}]] [[${u.apellidos}]]</td>
                                             <td>[[${u.correo}]]</td>
                                             <td>[[${u.telefono}]]</td>
                                             <td>
-                                                <span th:each="r : ${u.roles}" class="badge bg-info me-1">[[${r.nombre}]]</span>
+                                                <span th:each="r : ${u.roles}" class="badge bg-info me-1">[[${r.rol}]]</span>
                                             </td>
-                                            <td th:text="${u.activo} ? 'Activo':'Inactivo'"></td>
+                                            <td th:text="${u.activo} ? #{usuario.activo} : #{usuario.inactivo}"></td>
                                             <td>
                                                 <button type="button" class="btn btn-danger"
                                                         data-bs-toggle="modal" data-bs-target="#confirmModal"
@@ -144,16 +170,14 @@
             </div>
         </section>
 
-        <!-- 3 Fragmento que se utiliza en la página modifica.html -->
+        <!-- 3 Fragmento que se utiliza en la pagina modifica.html -->
         <section th:fragment="editar">
             <div class="row">
                 <div class="col-md-2"></div>
                 <div class="col-md-8">
                     <form method="POST" th:action="@{/usuario/guardar}"
-                          th:object="${usuario}" class="was-validated">
+                          th:object="${usuario}" class="was-validated" enctype="multipart/form-data">
                         <input type="hidden" name="idUsuario" th:field="*{idUsuario}"/>
-                                                                                                     <!-- La contraseña solo se define al crear; la gestión de credenciales  aun esta en estado de pediente -->
-                        <input type="hidden" name="password" th:field="*{password}"/>
                         <div class="row py-4 mb-4 bg-light">
                             <div class="col-md-4 d-grid">
                                 <a th:href="@{/usuario/listado}" class="btn btn-primary">
@@ -172,27 +196,54 @@
 
                                         <div class='mb-3'>
                                             <label>[[#{usuario.username}]]</label>
-                                            <input type="text" name='username' th:field="*{username}" class='form-control' required="true"/>
+                                            <input type="text" th:field="*{username}" class='form-control'
+                                                   th:classappend="${#fields.hasErrors('username')} ? 'is-invalid'" required="true"/>
+                                            <div th:replace="~{general/fragmentos :: campoError(campo='username')}"></div>
+                                        </div>
+
+                                        <div class='mb-3'>
+                                            <label>[[#{usuario.password}]]</label>
+                                            <input type="password" name='password' class='form-control'
+                                                   th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'"
+                                                   th:placeholder="#{usuario.password.conservar}"/>
+                                            <div class="form-text">[[#{usuario.password.conservar}]]</div>
+                                            <div th:replace="~{general/fragmentos :: campoError(campo='password')}"></div>
                                         </div>
 
                                         <div class='mb-3'>
                                             <label>[[#{usuario.nombre}]]</label>
-                                            <input type="text" name='nombre' th:field="*{nombre}" class='form-control' required="true"/>
+                                            <input type="text" th:field="*{nombre}" class='form-control'
+                                                   th:classappend="${#fields.hasErrors('nombre')} ? 'is-invalid'" required="true"/>
+                                            <div th:replace="~{general/fragmentos :: campoError(campo='nombre')}"></div>
                                         </div>
 
                                         <div class='mb-3'>
                                             <label>[[#{usuario.apellidos}]]</label>
-                                            <input type="text" name='apellidos' th:field="*{apellidos}" class='form-control' required="true"/>
+                                            <input type="text" th:field="*{apellidos}" class='form-control'
+                                                   th:classappend="${#fields.hasErrors('apellidos')} ? 'is-invalid'" required="true"/>
+                                            <div th:replace="~{general/fragmentos :: campoError(campo='apellidos')}"></div>
                                         </div>
 
                                         <div class='mb-3'>
                                             <label>[[#{usuario.correo}]]</label>
-                                            <input type="email" name='correo' th:field="*{correo}" class='form-control' required="true"/>
+                                            <input type="email" th:field="*{correo}" class='form-control'
+                                                   th:classappend="${#fields.hasErrors('correo')} ? 'is-invalid'" required="true"/>
+                                            <div th:replace="~{general/fragmentos :: campoError(campo='correo')}"></div>
                                         </div>
 
                                         <div class='mb-3'>
                                             <label>[[#{usuario.telefono}]]</label>
-                                            <input type="text" name='telefono' th:field="*{telefono}" class='form-control'/>
+                                            <input type="text" th:field="*{telefono}" class='form-control'
+                                                   th:classappend="${#fields.hasErrors('telefono')} ? 'is-invalid'"/>
+                                            <div th:replace="~{general/fragmentos :: campoError(campo='telefono')}"></div>
+                                        </div>
+
+                                        <div class='mb-3'>
+                                            <label>[[#{usuario.imagen}]]</label>
+                                            <!-- La foto actual se conserva si no se sube una nueva -->
+                                            <img th:if="*{rutaImagen} != null" th:src="*{rutaImagen}"
+                                                 class="d-block rounded-circle mb-2" height="80" alt="foto"/>
+                                            <input type="file" name='imagenFile' class='form-control' accept="image/*"/>
                                         </div>
 
                                         <div class='mb-3'>
@@ -202,7 +253,7 @@
                                                        name="idsRoles" th:value="${r.idRol}"
                                                        th:id="'rol'+${r.idRol}"
                                                        th:checked="${usuario.roles != null and #lists.contains(usuario.roles, r)}"/>
-                                                <label class="form-check-label" th:for="'rol'+${r.idRol}">[[${r.nombre}]]</label>
+                                                <label class="form-check-label" th:for="'rol'+${r.idRol}">[[${r.rol}]]</label>
                                             </div>
                                         </div>
 
@@ -216,41 +267,6 @@
                             </div>
                         </div>
                     </form>
-                </div>
-            </div>
-        </section>
-
-        <!-- 4 fragmento que se utiliza para confirmar eliminar a un usuario en especifico -->
-        <section th:fragment="confirmarEliminar">
-            <div class="modal fade"
-                 id="confirmModal"
-                 tabindex="-1"
-                 aria-labelledby="modalLabel"
-                 aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <form th:action="@{/usuario/eliminar}" th:object="${usuario}" method="post">
-                            <input type="hidden" name="idUsuario" id="modalId"/>
-                            <div class="modal-header bg-warning text-white">
-                                <h5 class="modal-title" id="modalLabel">
-                                    <i class="fa-solid fa-circle-radiation"></i> [[#{accion.confirmar}]]
-                                </h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                            </div>
-                            <div class="modal-body">
-                                <p>[[#{accion.confirmar.texto1}]] <span id="modalDescripcion"></span>?</p>
-                                <h6>[[#{accion.confirmar.texto2}]]</h6>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="submit" class="btn btn-danger">
-                                    <i class="fa-solid fa-trash"></i> [[#{accion.eliminar}]]
-                                </button>
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                    <i class="fa-solid fa-xmark"></i> [[#{accion.cerrar}]]
-                                </button>
-                            </div>
-                        </form>
-                    </div>
                 </div>
             </div>
         </section>

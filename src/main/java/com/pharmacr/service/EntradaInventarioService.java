@@ -1,8 +1,9 @@
 package com.pharmacr.service;
 
 import com.pharmacr.domain.EntradaInventario;
+import com.pharmacr.domain.TipoMovimiento;
+import com.pharmacr.domain.Usuario;
 import com.pharmacr.repository.EntradaInventarioRepository;
-import com.pharmacr.repository.MedicamentoRepository;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,32 +12,34 @@ import org.springframework.transaction.annotation.Transactional;
 public class EntradaInventarioService {
 
     private final EntradaInventarioRepository entradaInventarioRepository;
-    private final MedicamentoRepository medicamentoRepository;
-    private final AlertaService alertaService;
+    private final MedicamentoService medicamentoService;
 
     public EntradaInventarioService(EntradaInventarioRepository entradaInventarioRepository,
-            MedicamentoRepository medicamentoRepository, AlertaService alertaService) {
+            MedicamentoService medicamentoService) {
         this.entradaInventarioRepository = entradaInventarioRepository;
-        this.medicamentoRepository = medicamentoRepository;
-        this.alertaService = alertaService;
+        this.medicamentoService = medicamentoService;
     }
 
     @Transactional(readOnly = true)
     public List<EntradaInventario> getEntradas() {
-        return entradaInventarioRepository.findAll();
+        return entradaInventarioRepository.findAllConRelaciones();
     }
 
-    // Registra la entrada y aumenta el stock automáticamente (HU-11)
+    // Registra la entrada y aumenta el stock automaticamente HU-11
     @Transactional
-    public void save(EntradaInventario entrada) {
-        var medicamento = medicamentoRepository.findById(entrada.getMedicamento().getIdMedicamento());
-        if (medicamento.isEmpty()) {
+    public void save(EntradaInventario entrada, Usuario usuario) {
+        if (entrada.getMedicamento() == null || entrada.getMedicamento().getIdMedicamento() == null) {
+            throw new IllegalArgumentException("Debe seleccionar un medicamento.");
+        }
+        var idMedicamento = entrada.getMedicamento().getIdMedicamento();
+        if (medicamentoService.getMedicamento(idMedicamento).isEmpty()) {
             throw new IllegalArgumentException("El medicamento seleccionado no existe.");
         }
+        //El responsable es el usuario autenticado, no uno escogido en el formulario
+        entrada.setUsuario(usuario);
         entradaInventarioRepository.save(entrada);
-        var med = medicamento.get();
-        med.setStockActual(med.getStockActual() + entrada.getCantidad());
-        medicamentoRepository.save(med);
-        alertaService.revisar(med);
+        medicamentoService.ajustarStockYRegistrar(idMedicamento, entrada.getCantidad(), true,
+                "El medicamento ya no existe.", usuario, TipoMovimiento.Entrada,
+                "Entrada lote " + entrada.getLote(), entrada.getIdEntrada());
     }
 }

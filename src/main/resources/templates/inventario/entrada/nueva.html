@@ -13,13 +13,13 @@
 
                         <h2><i class="fas fa-plus"></i> [[#{inventario.entrada.titulo}]]</h2>
 
-                        <form th:action="@{/inventario/entrada/agregar}" th:object="${entrada}" method="post" class="mt-3">
+                        <form th:action="@{/inventario/entrada/guardar}" th:object="${entrada}" method="post" class="mt-3">
 
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-bold">[[#{proveedor.nombreComercial}]] *</label>
                                     <select class="form-select" th:field="*{proveedor.idProveedor}" required>
-                                        <option value="">-- Seleccione --</option>
+                                        <option value="">[[#{accion.seleccione}]]</option>
                                         <option th:each="p : ${proveedores}"
                                                 th:value="${p.idProveedor}"
                                                 th:text="${p.nombreComercial}"></option>
@@ -28,7 +28,7 @@
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-bold">[[#{medicamento.nombre}]] *</label>
                                     <select class="form-select" th:field="*{medicamento.idMedicamento}" required>
-                                        <option value="">-- Seleccione --</option>
+                                        <option value="">[[#{accion.seleccione}]]</option>
                                         <option th:each="m : ${medicamentos}"
                                                 th:value="${m.idMedicamento}"
                                                 th:text="${m.codigo + ' — ' + m.nombre}"></option>
@@ -55,13 +55,10 @@
                                            placeholder="Ej: 50" min="1" required/>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-bold">[[#{inventario.registradoPor}]] *</label>
-                                    <select class="form-select" th:field="*{usuario.idUsuario}" required>
-                                        <option value="">-- Seleccione --</option>
-                                        <option th:each="u : ${usuarios}"
-                                                th:value="${u.idUsuario}"
-                                                th:text="${u.username}"></option>
-                                    </select>
+                                    <label class="form-label fw-bold">[[#{inventario.registradoPor}]]</label>
+                                    <!-- El responsable es siempre el usuario autenticado -->
+                                    <input type="text" class="form-control" readonly="readonly"
+                                           th:value="${#authentication.name}"/>
                                 </div>
                             </div>
 
@@ -75,7 +72,7 @@
                                 <button type="submit" class="btn btn-primary me-2">
                                     <i class="fas fa-save"></i> [[#{accion.agregar}]]
                                 </button>
-                                <a th:href="@{/inventario/entradas}" class="btn btn-secondary">
+                                <a th:href="@{/inventario/entrada/listado}" class="btn btn-secondary">
                                     <i class="fas fa-arrow-left"></i> [[#{accion.cancelar}]]
                                 </a>
                             </div>

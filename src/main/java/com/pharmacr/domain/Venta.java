@@ -2,6 +2,8 @@ package com.pharmacr.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -9,6 +11,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -36,5 +39,11 @@ public class Venta implements Serializable {
     private BigDecimal total;
 
     @Column(nullable = false, length = 20)
-    private String estado;
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private EstadoVenta estado;
+
+    @Column(length = 75)
+    @Size(max = 75)
+    private String correoCliente;
 }

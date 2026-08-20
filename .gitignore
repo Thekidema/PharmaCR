@@ -14,3 +14,6 @@ target/
 .nbproject/
 nb-configuration.xml
 .DS_Store
+
+# Credenciales (no deben subirse al repo)
+src/main/resources/firebase/*.json

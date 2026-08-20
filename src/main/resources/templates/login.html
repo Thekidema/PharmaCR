@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{general/fragmentos :: head}"></head>
+    <body>
+        <header th:replace="~{general/fragmentos :: header}"></header>
+
+        <main class="container my-5">
+            <div class="row justify-content-center">
+                <div class="col-md-5">
+                    <div class="card shadow">
+                        <div class="card-header bg-primary text-white text-center">
+                            <h4><i class="fas fa-right-to-bracket"></i> [[#{login.titulo}]]</h4>
+                        </div>
+                        <div class="card-body">
+
+                            <!-- Credenciales incorrectas -->
+                            <div th:if="${param.error != null}" class="alert alert-danger" role="alert">
+                                <i class="fa-solid fa-bomb"></i> [[#{error.login}]]
+                            </div>
+                            <!-- Salida correcta del sistema -->
+                            <div th:if="${param.logout != null}" class="alert alert-success" role="alert">
+                                <i class="fa-solid fa-square-check"></i> [[#{login.salida}]]
+                            </div>
+
+                            <form method="POST" th:action="@{/login}" class="was-validated">
+                                <div class="mb-3">
+                                    <label class="form-label">[[#{login.username}]]</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                        <input type="text" name="username" class="form-control"
+                                               required="true" autofocus="true"/>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">[[#{login.password}]]</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-key"></i></span>
+                                        <input type="password" name="password" class="form-control"
+                                               required="true"/>
+                                    </div>
+                                </div>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-right-to-bracket"></i> [[#{login.login}]]</button>
+                                </div>
+                            </form>
+                            <div class="text-center mt-3">
+                                <a th:href="@{/recuperar_clave}">[[#{login.olvidoClave}]]</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer th:replace="~{general/fragmentos :: footer}"></footer>
+    </body>
+</html>
