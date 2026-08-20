@@ -83,20 +83,11 @@ Por defecto `application.properties` apunta a MySQL local. Crear el esquema con:
 sudo mysql < src/main/resources/creaTablas.sql
 ```
 
-Para trabajar contra la base compartida en la nube (Aiven) en su lugar, crear
-`src/main/resources/application-nube.properties` (está en `.gitignore`, nunca
-se sube) con estas tres líneas y las credenciales que comparte el equipo por
-fuera de git:
-
 ```properties
 spring.datasource.url=jdbc:mysql://<host-aiven>:<puerto>/pharmacr?sslMode=REQUIRED
 spring.datasource.username=avnadmin
 spring.datasource.password=<clave-compartida-por-el-equipo>
 ```
-
-Spring lo importa automáticamente si el archivo existe y sobreescribe la
-configuración local — no hace falta comentar ni descomentar nada. **Las
-credenciales de la nube nunca deben escribirse en `application.properties`.**
 
 ### Ejecutar
 
