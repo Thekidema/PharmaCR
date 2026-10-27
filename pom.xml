@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.1.0</version>
+        <version>4.1.2</version>
         <relativePath/>
     </parent>
     <groupId>com.pharmacr</groupId>
@@ -53,7 +53,7 @@
         <dependency>
             <groupId>com.google.firebase</groupId>
             <artifactId>firebase-admin</artifactId>
-            <version>9.9.0</version>
+            <version>9.11.0</version>
         </dependency>
         <dependency>
             <groupId>com.mysql</groupId>
@@ -83,7 +83,7 @@
         <dependency>
             <groupId>org.webjars</groupId>
             <artifactId>font-awesome</artifactId>
-            <version>7.2.0</version>
+            <version>7.3.0</version>
         </dependency>
         <dependency>
             <groupId>org.webjars</groupId>
